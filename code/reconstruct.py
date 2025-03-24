@@ -86,48 +86,10 @@ fc_climanom, fc_mth = ut.soln_anoms(fc)
 for eyear in eyears:
     print(f"Calculating reconstructions for {eyear}")
 
-    cexps_full = glob.glob(f"{CONV_DIR}/transfw_*_7d_{eyear}")
-    cexps = [exp.split("/")[-1] for exp in cexps_full]
+    conv_ecco=ut.load_ecco_convs(CONV_DIR, eyear)
+    conv_ecco=conv_ecco[ecco_convs['all']].chunk('auto')
 
-    cexps_mdict = {}
-    for exp in cexps:
-        cexps_mdict[exp] = mthi[exp.split("/")[-1].split("_")[1]]
-    cexps_edict = {m: k for k, m in cexps_mdict.items()}
-
-    conv_ecco = []
-    for exp in cexps:
-        print(f"Loading {exp}")
-        ds_exp = []
-        for year in range(1992, 2018):
-            ds = xr.open_mfdataset(
-                f"{CONV_DIR}/{exp}/{year}/*.nc", coords="minimal"
-            ).assign_coords({"year": year})
-            ds_exp.append(ds[ecco_convs["all"]])
-        ds_exp = (
-            xr.concat(ds_exp, "year")
-            .assign_coords({"exp": exp, "month": cexps_mdict[exp]})
-            .chunk({"year": 26, "lag_years": 260})
-        )
-        conv_ecco.append(ds_exp)
-    conv_ecco = xr.concat(conv_ecco, "exp").sel(year=slice(1992, 2018))
-
-    with dask.config.set(**{"array.slicing.split_large_chunks": False}):
-        conv_ecco = conv_ecco.sortby(conv_ecco.lag_years, ascending=False)
-
-    plotdates = []
-    for ie, exp in enumerate(cexps):
-        plotdates.append(
-            [
-                np.datetime64(
-                    f"{conv_ecco.year[i].data}-{cexps_mdict[exp]:02.0f}-16", "ns"
-                )
-                for i in range(0, 26)
-            ]
-        )
-
-    dJpred_ecco = conv_ecco.sum(dim="lag_years").assign_coords(
-        dates=(["exp", "year"], plotdates)
-    )
+    dJpred_ecco = conv_ecco.sum(dim="lag_years")
     dJpred_ecco["wind_EXF"] = (
         dJpred_ecco["adxx_tauuXEXFtauu_sum"] + dJpred_ecco["adxx_tauvXEXFtauv_sum"]
     )
@@ -138,7 +100,7 @@ for eyear in eyears:
     dJpred_ecco["all_EXF"] = dJpred_ecco[ecco_convs["EXF"]].to_array().sum("variable")
 
     dJpred_ecco_cumsum = conv_ecco.cumsum("lag_years").assign_coords(
-        dates=(["exp", "year"], plotdates)
+        dates=dJpred_ecco.dates
     )
     dJpred_ecco_cumsum["wind_EXF"] = (
         dJpred_ecco_cumsum["adxx_tauuXEXFtauu_sum"]
