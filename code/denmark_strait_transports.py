@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+# coding: utf-8
+"""
+denmark_strait_transports.py
+
+Calculate Denmark Strait Transports in the ECCOv4r4 solution
+
+Required to reproduce data for Boland et al. 2025 (in prep)
+See https://github.com/emmomp/CANARI_FWTRANS for details
+
+Updated Feb 2025
+
+@author: emmomp@bas.ac.uk Emma J D Boland
+"""
 from datetime import date
 import sys
 import xarray as xr

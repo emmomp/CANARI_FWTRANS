@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-reconst_denm_highfreq_all.py
+convolve.py
 
 Code to reconstruct ECCOv4r4 Denmark Strait Freshwater Flux from adjoint sensitivities.
 

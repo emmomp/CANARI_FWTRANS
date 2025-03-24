@@ -1,13 +1,5 @@
-import glob
-import sys
-import dask
-import pandas as pd
-from scipy import stats
-from scipy import signal
-import xarray as xr
-import numpy as np
-sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
-import ecco_v4_py as ecco
+#!/usr/bin/env python3
+# coding: utf-8
 """
 utils.py
 
@@ -20,7 +12,16 @@ Updated Feb 2025
 
 @author: emmomp@bas.ac.uk Emma J D Boland
 """
-
+import glob
+import sys
+import dask
+import pandas as pd
+from scipy import stats
+from scipy import signal
+import xarray as xr
+import numpy as np
+sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
+import ecco_v4_py as ecco
 
 
 def plot_ecco(ecco_grid, dplot, cmap="RdBu_r", show_colorbar=True, **kwargs):
