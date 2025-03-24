@@ -1,3 +1,15 @@
+#!/usr/bin/env python3
+# coding: utf-8
+"""
+Inputs for other scripts, mostly directory locations and metadata
+
+Required to reproduce data for Boland et al. 2025 (in prep)
+See https://github.com/emmomp/CANARI_FWTRANS for details
+
+Updated Mar 2025
+
+@author: emmomp@bas.ac.uk Emma J D Boland
+"""
 import xarray as xr
 
 FCNAME = "horflux_fw_denm"
@@ -58,7 +70,4 @@ mth = [
 ]
 mthi = dict(zip(mth, list(range(1, 13))))
 
-imth = dict(
-    zip(range(1, 13),
-      mth)
-)
+imth = dict(zip(range(1, 13), mth))

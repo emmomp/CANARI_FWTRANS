@@ -17,12 +17,10 @@ from datetime import date
 import dask
 import xarray as xr
 import numpy as np
+import inputs
 import utils as ut
 
-EXPDIR = "/users/emmomp/data/canari/experiments"
 EXPT = "fwd_26y"
-FCNAME = "horflux_fw_denm"
-CONV_DIR = "../data_out/denm_X_ECCOclimanom_hfreq"
 
 attrs = {
     "contact": "emmomp@bas.ac.uk",
@@ -33,60 +31,14 @@ attrs = {
     see ecco-group.org",
 }
 
-eyears = ["2006", "2014", "2000"]
-
-adj_diag_map = {
-    "adxx_qnet": ["EXFqnet", "oceQnet"],
-    "adxx_tauu": ["oceTAUU", "EXFtauu"],
-    "adxx_tauv": ["oceTAUV", "EXFtauv"],
-    "adxx_empmr": ["EXFempmr", "oceFWflx"],
-}
-
-ecco_convs = {}
-ecco_convs["all"] = []
-ecco_convs["OCE"] = []
-ecco_convs["EXF"] = []
-ecco_convs_2d = []
-for adj, diag in adj_diag_map.items():
-    ecco_convs["all"] = ecco_convs["all"] + [adj + "X" + v + "_sum" for v in diag]
-    ecco_convs_2d = ecco_convs_2d + [adj + "X" + v for v in diag]
-    ecco_convs["OCE"] = ecco_convs["OCE"] + [
-        adj + "X" + v + "_sum" for v in diag if v[:3] == "oce"
-    ]
-    ecco_convs["EXF"] = ecco_convs["EXF"] + [
-        adj + "X" + v + "_sum" for v in diag if v[:3] == "EXF"
-    ]
-
-oexps = [
-    "transfw_Mar_noparam_7d",
-    "transfw_Jun_noparam_7d",
-    "transfw_Sep_noparam_7d",
-    "transfw_Dec_noparam_7d",
-]
-mth = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-]
-mthi = dict(zip(mth, list(range(1, 13))))
-
 print("Loading solution")
 fc = ut.get_soln(FCNAME, f"{EXPDIR}/{EXPT}")
 fc_climanom, fc_mth = ut.soln_anoms(fc)
 
-for eyear in eyears:
+for eyear in eyears[1:]:
     print(f"Calculating reconstructions for {eyear}")
 
-    conv_ecco=ut.load_ecco_convs(CONV_DIR, eyear)
+    conv_ecco,cexps_mdict,cexps_edict=ut.load_ecco_convs(CONV_DIR, eyear)
     conv_ecco=conv_ecco[ecco_convs['all']].chunk('auto')
 
     dJpred_ecco = conv_ecco.sum(dim="lag_years")
@@ -121,10 +73,10 @@ for eyear in eyears:
     dJ_vars = dJpred_ecco.squeeze().stack(yearexp=["exp", "year"]).sortby("dates")
 
     cum_ev = xr.open_dataset(
-        f"../data_out/horflux_fw_denm_cumev_bylag_byvar_{eyear}.nc"
+        f"{EV_DIR}/{eyear}/horflux_fw_denm_cumev_bylag_byvar_{eyear}.nc"
     )
     cum_ev_bym = xr.open_dataset(
-        f"../data_out/horflux_fw_denm_cumev_bylag_byvar_bymonth_{eyear}.nc"
+        f"{EV_DIR}/{eyear}/horflux_fw_denm_cumev_bylag_byvar_bymonth_{eyear}.nc"
     )
     cum_ev_bym["lag_years"] = cum_ev["lag_years"]
     lagmax = cum_ev_bym.idxmax("lag_years").squeeze().load()
@@ -144,7 +96,7 @@ for eyear in eyears:
         )
         YY.attrs.update(attrs)
         YY.drop_vars(["yearexp", "exp"]).to_netcdf(
-            f"../data_out/denstr_fwflux_4yrecon_{eyear}_{var}.nc"
+            f"{RECON_DIR}/denstr_fwflux_4yrecon_{eyear}_{var}.nc"
         )
 
         # Peak year reconstruction
@@ -166,7 +118,7 @@ for eyear in eyears:
         print(f"Peak reconstruction, {var}")
         YY.attrs.update(attrs)
         YY.drop_vars(["yearexp", "exp"]).to_netcdf(
-            f"../data_out/denstr_fwflux_peakEVrecon_{eyear}_{var}.nc"
+            f"{RECON_DIR}/denstr_fwflux_peakEVrecon_{eyear}_{var}.nc"
         )
 
         # Peak seasonal reconstruction
@@ -189,7 +141,7 @@ for eyear in eyears:
         YY.attrs.update(attrs)
         print(f"Peak monthly reconstruction, {var}")
         YY.drop_vars(["yearmonth", "exp"]).to_netcdf(
-            f"../data_out/denstr_fwflux_mthEVrecon_{eyear}_{var}.nc"
+            f"{RECON_DIR}/denstr_fwflux_mthEVrecon_{eyear}_{var}.nc"
         )
 
         print(f"Done {var}")

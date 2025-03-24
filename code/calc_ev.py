@@ -16,6 +16,7 @@ import os.path
 from datetime import date
 import xarray as xr
 import utils as ut
+import inputs
 
 attrs = {
     "contact": "emmomp@bas.ac.uk",
@@ -24,20 +25,6 @@ attrs = {
     "date": "Created on " + date.today().strftime("%d/%m/%Y"),
     "notes": "Data produced by analysis of the ECCOv4r4 global ocean state \
     estimate,see ecco-group.org",
-}
-
-ROOTDIR = "/users/emmomp/data/canari/experiments/"
-CONV_DIR = "../data_out/denm_X_ECCOclimanom_hfreq"
-EXPT = "fwd_26y"
-FCNAME = "horflux_fw_denm"
-DATA_DIR = "../data_out/ev/"
-
-eyears = ["2000", "2006", "2014"]
-ecco3d_ecco_map = {
-    "adxx_qnet": ["EXFqnet", "oceQnet"],
-    "adxx_tauu": ["oceTAUU", "EXFtauu"],
-    "adxx_tauv": ["oceTAUV", "EXFtauv"],
-    "adxx_empmr": ["EXFempmr", "oceFWflx"],
 }
 
 # Lags for 2D EV fields
@@ -50,25 +37,9 @@ lag_labels = [
     "0 to -4 y lag",
 ]
 
-ecco_convs = {}
-ecco_convs["all"] = []
-ecco_convs["OCE"] = []
-ecco_convs["EXF"] = []
-ecco_convs_2d = []
-for x in ecco3d_ecco_map:
-    ecco_convs["all"] = ecco_convs["all"] + [
-        x + "X" + v + "_sum" for v in ecco3d_ecco_map[x]
-    ]
-    ecco_convs_2d = ecco_convs_2d + [x + "X" + v for v in ecco3d_ecco_map[x]]
-    ecco_convs["OCE"] = ecco_convs["OCE"] + [
-        x + "X" + v + "_sum" for v in ecco3d_ecco_map[x] if v[:3] == "oce"
-    ]
-    ecco_convs["EXF"] = ecco_convs["EXF"] + [
-        x + "X" + v + "_sum" for v in ecco3d_ecco_map[x] if v[:3] == "EXF"
-    ]
-
-ecco_grid = xr.open_dataset("~/data/orchestra/other_data/ECCO_r3_alt/ECCOv4r3_grid.nc")
-fc_climanom, fc_mth = ut.get_soln(FCNAME, f"{ROOTDIR}/{EXPT}")
+EXPT = "fwd_26y"
+fc = ut.get_soln(FCNAME, f"{EXPDIR}/{EXPT}")
+fc_climanom, fc_mth = ut.soln_anoms(fc)
     
 def main():
     out={}
@@ -83,18 +54,18 @@ def main():
 
         dJpred_var_bylag = conv_ecco[ecco_convs["all"]].squeeze().chunk('auto')
 
-        fout = f"{DATA_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_{eyear}.nc"
+        fout = f"{EV_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_{eyear}.nc"
         out[eyear]['ev_total'] = calc_ev_1d(fout, dJpred_var_bylag)
-        fout = f"{DATA_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_bymonth_{eyear}.nc"
+        fout = f"{EV_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_bymonth_{eyear}.nc"
         out[eyear]['ev_total_bym'] = calc_ev_1d(fout, dJpred_var_bylag, bymonth=True)
 
         dJpred_ecco_cumsum = (
              dJpred_var_bylag.cumsum("lag_years").assign_coords(conv_ecco.coords)
         )
 
-        fout = f"{DATA_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_{eyear}.nc"
+        fout = f"{EV_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_{eyear}.nc"
         out[eyear]['cum_ev_total'] = calc_ev_1d(fout, dJpred_ecco_cumsum)
-        fout = f"{DATA_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_bymonth_{eyear}.nc"
+        fout = f"{EV_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_bymonth_{eyear}.nc"
         out[eyear]['cum_ev_total_bym'] = calc_ev_1d(fout, dJpred_ecco_cumsum, bymonth=True)
 
         print("calculating 2-D EV")
@@ -104,9 +75,9 @@ def main():
             print(var)
             dJ_2d = conv_ecco[var]
 
-            fout = f"{DATA_DIR}/{FCNAME}_fullEV2d_{var}_{eyear}.nc"
+            fout = f"{EV_DIR}/{FCNAME}_fullEV2d_{var}_{eyear}.nc"
             out[eyear]['ev_2d_full'][var] = calc_ev_2d(fout, dJ_2d, lags, lag_labels)
-            fout = f"{DATA_DIR}/{FCNAME}_monthlyEV2d_{var}_{eyear}.nc"
+            fout = f"{EV_DIR}/{FCNAME}_monthlyEV2d_{var}_{eyear}.nc"
             out[eyear]['ev_2d_bym'][var] = calc_ev_2d(fout, dJ_2d, lags, lag_labels, bymonth=True)
         
     return out
