@@ -1,5 +1,6 @@
 plots
 data_out
+notebooks/*py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
