@@ -15,20 +15,22 @@ Updated Feb 2025
 import os
 import calendar
 import sys
+from datetime import date
 import xarray as xr
 import numpy as np
 
 sys.path.insert(0, "/users/emmomp/Python")
 import xadjoint as xad
 import pandas as pd
-from datetime import date
 import convolve_fns
-import inputs
+from inputs import adj_diag_map, ecco_grid, eyears, imth, EXPDIR, GRIDDIR, TRANSP, CONV_DIR
 
 attrs={'contact':'emmomp@bas.ac.uk',
-       'references':'ECCOv4r4 Denmark Strait FW flux reconstructions from Boland et al. 2025 (inprep)',
+       'references':'ECCOv4r4 Denmark Strait FW flux reconstructions from Boland\
+       et al. 2025 (inprep)',
        'date':'Created on '+date.today().strftime("%d/%m/%Y"),
-       'notes':'Data produced by analysis of the ECCOv4r4 global ocean state estimate, see ecco-group.org'}
+       'notes':'Data produced by analysis of the ECCOv4r4 global ocean state estimate,\
+       see ecco-group.org'}
 
 eyear = sys.argv[1]  # Should be 2000, 2006 or 2014
 print(eyear)
@@ -42,7 +44,7 @@ ADJFREQ = 604800
 
 mth_num = [3, 6, 9, 12]
 
-ds_climanom = xr.open_dataset(f"{EXP_DIR}/fwd_26y/exf_climanoms.nc")
+ds_climanom = xr.open_dataset(f"{EXPDIR}/fwd_26y/exf_climanoms.nc")
 
 for iem in mth_num:
     # for iem in [10,]:
