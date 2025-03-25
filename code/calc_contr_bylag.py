@@ -17,7 +17,7 @@ import glob
 from datetime import date
 import xarray as xr
 import utils as ut
-import inputs
+from inputs import *
 
 attrs = {
     "contact": "emmomp@bas.ac.uk",

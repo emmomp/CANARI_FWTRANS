@@ -212,18 +212,28 @@ def calc_tseries(data, masks=None, var_list=None):
 
     """
 
-    ds_out = []
-    for mask in masks.keys():
-        ds_masked = data.where(masks[mask])
+    if masks:
+        ds_out = []
+        for mask in masks.keys():
+            ds_masked = data.where(masks[mask])
+            ad_mean = ds_masked.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
+            ad_absmean = (
+                np.abs(ds_masked)
+                .sum(dim=["i", "j", "tile"])
+                .assign_coords({"stat": "abssum"})
+            )
+            ds_mask = xr.concat([ad_mean, ad_absmean], "stat").assign_coords({"mask": mask})
+            ds_out.append(ds_mask)
+        ds_out = xr.concat(ds_out, "mask", coords="minimal")
+    else:
         ad_mean = ds_masked.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
         ad_absmean = (
-            np.abs(ds_masked)
-            .sum(dim=["i", "j", "tile"])
-            .assign_coords({"stat": "abssum"})
-        )
-        ds_mask = xr.concat([ad_mean, ad_absmean], "stat").assign_coords({"mask": mask})
-        ds_out.append(ds_mask)
-    ds_out = xr.concat(ds_out, "mask", coords="minimal")
+                    np.abs(ds_masked)
+                    .sum(dim=["i", "j", "tile"])
+                    .assign_coords({"stat": "abssum"})
+                )
+        ds_out=xr.concat([ad_mean, ad_absmean], "stat")
+    
 
     if var_list:
         return ds_out[var_list]

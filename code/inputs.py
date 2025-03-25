@@ -25,7 +25,6 @@ FCNAME = "horflux_fw_denm"
 ecco_grid = xr.open_dataset("~/data/orchestra/other_data/ECCO_r3_alt/ECCOv4r3_grid.nc")
 
 eyears = ["2006", "2014", "2000"]
-
 adj_diag_map = {
     "adxx_qnet": ["EXFqnet", "oceQnet"],
     "adxx_tauu": ["oceTAUU", "EXFtauu"],

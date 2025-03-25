@@ -17,7 +17,7 @@ from datetime import date
 import dask
 import xarray as xr
 import numpy as np
-import inputs
+from inputs import *
 import utils as ut
 
 EXPT = "fwd_26y"
@@ -35,7 +35,7 @@ print("Loading solution")
 fc = ut.get_soln(FCNAME, f"{EXPDIR}/{EXPT}")
 fc_climanom, fc_mth = ut.soln_anoms(fc)
 
-for eyear in eyears[1:]:
+for eyear in eyears[2:]:
     print(f"Calculating reconstructions for {eyear}")
 
     conv_ecco,cexps_mdict,cexps_edict=ut.load_ecco_convs(CONV_DIR, eyear)
