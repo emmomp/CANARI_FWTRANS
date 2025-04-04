@@ -69,7 +69,7 @@ for iem in mth_num:
 
         myexp = xad.Experiment(
             GRIDDIR,
-            EXPDIR + expt,
+            f'{EXPDIR}/{expt}',
             start_date=STARTDATE,
             lag0=lag0,
             nt=NT_ADJ,

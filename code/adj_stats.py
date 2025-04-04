@@ -15,19 +15,22 @@ Updated Mar 2025
 import calendar
 import sys
 
+sys.path.insert(0,'/users/emmomp/Python/ECCOv4-py')
+import ecco_v4_py as ecco
 sys.path.insert(0, "/users/emmomp/Python")
 import xadjoint as xad
 import utils as ut
 from inputs import GRIDDIR, EXPDIR, eyears, mthi
 
-mths = ["Mar", "Jun", "Sep", "Dec"]
+#mths = ["Mar", "Jun", "Sep", "Dec"]
+mths=['Jan','Feb','Apr','May','Jul','Aug','Oct','Nov']
 ADJ_FREQ = 604800
 NT = 260
 adj_vars = ["adxx_qnet", "adxx_empmr", "adxx_tauu", "adxx_tauv"]
 
 for mth in mths:
     for year in eyears:
-        EXPT = f"ad_5y_denstr_horflux_fw_{mth}_noparam_7d_{year}/"
+        EXPT = f"ad_5y_denstr_horflux_fw_{mth}_noparam_7d_{year}_synth/"
         STARTDATE = f"{int(year)-4}-01-01"
         lag0 = f"{year}-{mthi[mth]:02.0f}-{calendar.monthrange(int(year),mthi[mth])[1]}"
         print(EXPT, STARTDATE, lag0)
@@ -45,7 +48,8 @@ for mth in mths:
         myexp.data["adxx_tauv"] = -myexp.data["adxx_tauv"].rename({"j_g": "j"})
 
         myexp.data = myexp.data.assign_coords(
-            {"eyear": year, "month": mth, "fc": myexp.fc}
-        ).swap_dims({"time": "lag_years"})
-        data_stats = ut.calc_tseries(myexp.data)
-        data_stats.to_netcdf({f"{EXPDIR}/{EXPT}/{EXPT}_stats.nc"})
+            {"eyear": year, "month": mth}).swap_dims({"time": "lag_years"})
+        if hasattr(myexp,'fc'):
+            myexp.data = myexp.data.assign_coords({ "fc": myexp.fc})
+        data_stats = ut.calc_tseries(myexp.data.chunk({'tile':-1,'j':-1,'i':-1}))
+        data_stats.to_netcdf(f"{EXPDIR}/{EXPT}/{EXPT[:-1]}_stats.nc")

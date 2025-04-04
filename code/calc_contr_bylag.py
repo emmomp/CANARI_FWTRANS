@@ -46,27 +46,27 @@ for eyear in eyears:
 
     for ilag in range(0, len(lags) - 1):
         print(f"Calculating {lag_labels[ilag]}")
-        fout = f"../data_out/ecco_2dconvs_{eyear}_{lag_flabels[ilag]}.nc"
+        fout = f"{CONTR_DIR}/{eyear}/ecco_2dconvs_{eyear}_{lag_flabels[ilag]}.nc"
         ds_exp = (
             conv_ecco[ecco_convs_2d]
-            .sel(lag_years=slice(lags[ilag + 1], lags[ilag]))
+            .sel(lag_years=slice(lags[ilag], lags[ilag+1]))
             .sum("lag_years")
             .squeeze()
         )
         ds_exp = ds_exp.assign_coords(
-            {"lag_range": lag_labels[ilag], "month": cexps_mdict[exp]}
+            {"lag_range": lag_labels[ilag], "month":('exp',[cexps_mdict[exp] for exp in ds_exp.exp.data])}
         )
         ds_exp.to_netcdf(fout)
     ilag += 1
-    fout = f"../data_out/ecco_convs_{eyear}_{lag_flabels[ilag]}.nc"
+    fout = f"{CONTR_DIR}/{eyear}/ecco_convs_{eyear}_{lag_flabels[ilag]}.nc"
     ds_exp = (
         conv_ecco[ecco_convs_2d]
-        .sel(lag_years=slice(lags[-1], 0))
+        .sel(lag_years=slice(0,lags[-1]))
         .sum("lag_years")
         .squeeze()
     )
     ds_exp = ds_exp.assign_coords(
-        {"lag_range": lag_labels[-1], "month": cexps_mdict[exp]}
+        {"lag_range": lag_labels[-1], "month": [cexps_mdict[exp] for exp in ds_exp.exp.data]}
     )
     ds_exp.attrs.update(attrs)
-    ds_plot.to_netcdf(fout)
+    ds_exp.to_netcdf(fout)

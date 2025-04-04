@@ -226,9 +226,9 @@ def calc_tseries(data, masks=None, var_list=None):
             ds_out.append(ds_mask)
         ds_out = xr.concat(ds_out, "mask", coords="minimal")
     else:
-        ad_mean = ds_masked.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
+        ad_mean = data.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
         ad_absmean = (
-                    np.abs(ds_masked)
+                    np.abs(data)
                     .sum(dim=["i", "j", "tile"])
                     .assign_coords({"stat": "abssum"})
                 )
@@ -282,7 +282,7 @@ def UVline_from_UXVY(xfld, yfld, coords, section):
     return u_line, v_line
 
 
-def load_ecco_convs(conv_dir, eyear, var=None):
+def load_ecco_convs(conv_dir, eyear, var=None, exp=None):
     """
     Load convolutions of adjoint sensitivities produced by reconstruct.py
     """
@@ -302,8 +302,11 @@ def load_ecco_convs(conv_dir, eyear, var=None):
     ]
     mthi = dict(zip(mth, list(range(1, 13))))
 
-    cexps_full = glob.glob(f"{conv_dir}/transfw_*_7d_{eyear}")
-    cexps = [exp.split("/")[-1] for exp in cexps_full]
+    if exp:
+        cexps=[exp,]
+    else:
+        cexps_full = glob.glob(f"{conv_dir}/transfw_*_7d_{eyear}")
+        cexps = [exp.split("/")[-1] for exp in cexps_full]
 
     cexps_mdict = {}
     for exp in cexps:
@@ -341,6 +344,74 @@ def load_ecco_convs(conv_dir, eyear, var=None):
         )
     conv_ecco = conv_ecco.assign_coords(dates=(["exp", "year"], plotdates))
 
+    print("Done loading")
+
+    return conv_ecco,cexps_mdict,cexps_edict
+
+    
+def load_ecco_convs_synth(conv_dir, eyear, var=None, exp=None):
+    """
+    Load convolutions of adjoint sensitivities produced by reconstruct.py
+    """
+    mth = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ]
+    mthi = dict(zip(mth, list(range(1, 13))))
+
+    if exp:
+        cexps=[exp,]
+    else:
+        cexps_full = glob.glob(f"{conv_dir}/transfw_???_noparam_7d_{eyear}")+glob.glob(f"{conv_dir}/transfw_???_noparam_7d_{eyear}_synth")
+        cexps = [exp.split("/")[-1] for exp in cexps_full]
+
+    cexps_mdict = {}
+    for exp in cexps:
+        cexps_mdict[exp] = mthi[exp.split("/")[-1].split("_")[1]]
+    cexps_edict = {m: k for k, m in cexps_mdict.items()}
+
+    conv_ecco = []
+    for exp in cexps:
+        print(f"Loading {exp}")
+        ds_exp = []
+        for year in range(1996, 2018):
+            if var:
+                ds=xr.open_mfdataset(f"{conv_dir}/{exp}/{year}/*{var}.nc", coords="minimal")
+            else:
+                ds = xr.open_mfdataset(f"{conv_dir}/{exp}/{year}/*.nc", coords="minimal")
+            ds_exp.append(ds)
+        ds_exp = (
+            xr.concat(ds_exp, "year")
+            .assign_coords({"exp": exp})
+        )
+        conv_ecco.append(ds_exp)
+    with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+        conv_ecco = xr.concat(conv_ecco, "exp",coords='minimal',compat='override')
+        conv_ecco = conv_ecco.sortby(conv_ecco.lag_years, ascending=False)
+
+    plotdates = []
+    for exp in cexps:
+        plotdates.append(
+            [
+                np.datetime64(
+                    f"{conv_ecco.year[i].data}-{cexps_mdict[exp]:02.0f}-16", "ns"
+                )
+                for i in range(0, 22)
+            ]
+        )
+    conv_ecco = conv_ecco.assign_coords(dates=(["exp", "year"], plotdates))
+    conv_ecco = conv_ecco.assign_coords(month=(["exp"],[cexps_mdict[exp] for exp in conv_ecco.exp.data]))
+    
     print("Done loading")
 
     return conv_ecco,cexps_mdict,cexps_edict

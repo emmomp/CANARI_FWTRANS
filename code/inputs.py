@@ -18,6 +18,7 @@ EV_DIR = "../data_out/ev"
 RECON_DIR = "../data_out/reconstructions"
 EXPDIR = "/users/emmomp/data/canari/experiments"
 GRIDDIR = "/users/emmomp/data/orchestra/grid2/"
+CONTR_DIR = "../data_out/contrs"
 
 TRANSP = "fw"
 FCNAME = "horflux_fw_denm"
@@ -26,25 +27,39 @@ ecco_grid = xr.open_dataset("~/data/orchestra/other_data/ECCO_r3_alt/ECCOv4r3_gr
 
 eyears = ["2006", "2014", "2000"]
 adj_diag_map = {
-    "adxx_qnet": ["EXFqnet", "oceQnet"],
+    "adxx_qnet": ["oceQnet","EXFqnet" ],
     "adxx_tauu": ["oceTAUU", "EXFtauu"],
     "adxx_tauv": ["oceTAUV", "EXFtauv"],
-    "adxx_empmr": ["EXFempmr", "oceFWflx"],
+    "adxx_empmr": [ "oceFWflx","EXFempmr"],
 }
+
+adj_units=dict(zip(['adxx_qnet','adxx_empmr','adxx_tauu','adxx_tauv'],['W/m$^2$','m/s','m$^2$/s','m$^2$/s']))
+adj_labels=dict(zip(['adxx_qnet','adxx_empmr','adxx_tauu','adxx_tauv'],['Net Heat Flux','Net Freshwater Flux','Zonal Wind Stress','Meridional Wind Stress']))
+
+masks_labels=dict(zip(['global','egland','natl','arct','gin'],['Global','E Gland','N Atl','Arctic','GIN']))
 
 ecco_convs = {}
 ecco_convs["all"] = []
 ecco_convs["OCE"] = []
 ecco_convs["EXF"] = []
-ecco_convs_2d = []
+ecco_convs_2d = {}
+ecco_convs_2d["all"] = []
+ecco_convs_2d["OCE"] = []
+ecco_convs_2d["EXF"] = []
 for adj, diag in adj_diag_map.items():
     ecco_convs["all"] = ecco_convs["all"] + [adj + "X" + v + "_sum" for v in diag]
-    ecco_convs_2d = ecco_convs_2d + [adj + "X" + v for v in diag]
+    ecco_convs_2d["all"] = ecco_convs_2d["all"] + [adj + "X" + v for v in diag]
     ecco_convs["OCE"] = ecco_convs["OCE"] + [
         adj + "X" + v + "_sum" for v in diag if v[:3] == "oce"
     ]
     ecco_convs["EXF"] = ecco_convs["EXF"] + [
         adj + "X" + v + "_sum" for v in diag if v[:3] == "EXF"
+    ]
+    ecco_convs_2d["OCE"] = ecco_convs_2d["OCE"] + [
+        adj + "X" + v  for v in diag if v[:3] == "oce"
+    ]
+    ecco_convs_2d["EXF"] = ecco_convs_2d["EXF"] + [
+        adj + "X" + v  for v in diag if v[:3] == "EXF"
     ]
 
 oexps = [
