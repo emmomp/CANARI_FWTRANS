@@ -3,6 +3,7 @@ data_out
 notebooks/*py
 code/.pylintrc
 code/*txt
+other_data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
