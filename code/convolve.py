@@ -52,11 +52,12 @@ for iem in mth_num:
     print(expt)
     for lag_mth in [-1, 0, 1]:
         #   for lag_mth in [-1,0]:
-        print(imth[np.mod(iem-1 + lag_mth, 12)])
+        lmth = np.mod(iem-1 + lag_mth, 12) + 1
+        print(imth[lmth])
         STARTDATE = (
             str(np.datetime64(startdate1, "M") + np.timedelta64(lag_mth, "M")) + "-01"
         )
-        lmth = np.mod(iem-1 + lag_mth, 12) + 1
+        
         if iem == 12 and lag_mth == 1:
             lag0 = np.datetime64(
                 f"{int(eyear)+1}-{lmth:02.0f}-{calendar.monthrange(int(eyear),lmth)[1]}"
