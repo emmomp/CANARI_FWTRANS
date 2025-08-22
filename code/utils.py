@@ -194,7 +194,7 @@ def pcorr_ufunc(fc, dJ, loopdim="year"):
     return pstats
 
 
-def calc_tseries(data, masks=None, var_list=None):
+def calc_tseries(data, masks=None, var_list=None, weight=None):
     """
     Calculates time series of provided fields
 
@@ -208,17 +208,22 @@ def calc_tseries(data, masks=None, var_list=None):
 
     Returns
     -------
-    xarray dataset containing the mean and mean of the absolute values of the variables in var_list, in the regions specified in the dictionary masks
+    xarray dataset containing the sum and wsum of the absolute values of the variables in var_list, in the regions specified in the dictionary masks
 
     """
 
     if masks:
         ds_out = []
         for mask in masks.keys():
-            ds_masked = data.where(masks[mask])
+            if weight is None:        
+                ds_masked = data.where(masks[mask])
+                ds_masked_abs= np.abs(data.where(masks[mask]))
+            else:
+                ds_masked= data.where(masks[mask]).weighted(weight)
+                ds_masked_abs= np.abs(data.where(masks[mask])).weighted(weight)
             ad_mean = ds_masked.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
             ad_absmean = (
-                np.abs(ds_masked)
+                ds_masked_abs
                 .sum(dim=["i", "j", "tile"])
                 .assign_coords({"stat": "abssum"})
             )
@@ -226,9 +231,12 @@ def calc_tseries(data, masks=None, var_list=None):
             ds_out.append(ds_mask)
         ds_out = xr.concat(ds_out, "mask", coords="minimal")
     else:
+        if weight:
+            data=data.weighted(weight)
+            data_abs=np.abs(data).weighted(weight)
         ad_mean = data.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
         ad_absmean = (
-                    np.abs(data)
+                    data_abs
                     .sum(dim=["i", "j", "tile"])
                     .assign_coords({"stat": "abssum"})
                 )
@@ -255,11 +263,16 @@ def load_canari_masks():
     masks["natl"] = masks["atl"] * (ecco_grid.YC > 40)  # north atl
     # masks['arctplus']=masks['arct']+masks['baffin']+masks['hudson']
     masks["satl"] = masks["atl"] - masks["natl"]
-    masks["egland"] = xr.open_dataarray("../data_out/EGland_llcmask.nc")
-    masks["natl"] = xr.where(masks["egland"] == 1, 0, masks["natl"])
-    masks["gin"] = xr.where(masks["egland"] == 1, 0, masks["gin"])
+   # masks["egland"] = xr.open_dataarray("../data_out/EGland_llcmask.nc")
+    masks["gland"] = xr.open_dataarray("../other_data/greenlandsea_mask.nc")
+    masks["natl"] = xr.where(masks["gland"] == 1, 0, masks["natl"])
+    masks["norw"] = xr.where(masks["gland"] == 1, 0, masks["gin"])
+    masks["gland"] = xr.where((masks["norw"] == 1)&(ecco_grid.XC < -17), 1, masks["gland"])
+    masks["norw"] = xr.where(ecco_grid.XC < -17, 0, masks["norw"])
+    masks["arct"] = xr.where(masks["gland"] == 1, 0, masks["arct"])
     my_masks = masks.copy()
     my_masks.pop('atl')
+    my_masks.pop('gin')
 
     return my_masks
 
