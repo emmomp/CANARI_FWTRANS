@@ -12,7 +12,6 @@ Updated Mar 2025
 """
 import xarray as xr
 
-FCNAME = "horflux_fw_denm"
 CONV_DIR = "../data_out/denm_X_ECCOclimanom_hfreq"
 PERTCONV_DIR = "../data_out/denm_X_perts_hfreq"
 EV_DIR = "../data_out/ev"
@@ -22,6 +21,7 @@ GRIDDIR = "/users/emmomp/data/orchestra/grid2/"
 SOLN_DIR='/data/expose/ECCOv4-r4/Version4/Release4/nctiles_monthly'
 CONTR_DIR = "../data_out/contrs"
 DATA_DIR= "../data_out"
+MASK_DIR = "/data/smurphs/emmomp/canari/masks"
 
 TRANSP = "fw"
 FCNAME = "horflux_fw_denm"

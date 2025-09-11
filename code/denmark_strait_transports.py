@@ -15,12 +15,12 @@ Updated Feb 2025
 from datetime import date
 import sys
 import xarray as xr
+from inputs import SOLN_DIR, ecco_grid
 
 sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
 
 SECTION = "Denmark Strait"
-DATA_DIR = "/data/expose/ECCOv4-r4/Version4/Release4/nctiles_monthly"
 SREF = 35
 
 attrs = {
@@ -30,11 +30,10 @@ attrs = {
     "notes": "Data produced by analysis of the ECCOv4r4 state estimate, see ecco-group.org",
 }
 
-ecco_grid = xr.open_dataset("~/data/orchestra/other_data/ECCO_r3_alt/ECCOv4r3_grid.nc")
 grid = ecco.get_llc_grid(ecco_grid)
 
 ds = ecco.recursive_load_ecco_var_from_years_nc(
-    DATA_DIR,
+    SOLN_DIR,
     vars_to_load=[
         "THETA",
         "SALT",

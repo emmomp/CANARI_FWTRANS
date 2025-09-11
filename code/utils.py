@@ -234,6 +234,8 @@ def calc_tseries(data, masks=None, var_list=None, weight=None):
         if weight:
             data=data.weighted(weight)
             data_abs=np.abs(data).weighted(weight)
+        else:
+            data_abs=np.abs(data)
         ad_mean = data.sum(dim=["i", "j", "tile"]).assign_coords({"stat": "sum"})
         ad_absmean = (
                     data_abs
@@ -332,7 +334,7 @@ def load_ecco_convs(conv_dir, eyear, var=None, exp=None):
         ds_exp = []
         for year in range(1996, 2018):
             if var:
-                ds=xr.open_mfdataset(f"{conv_dir}/{exp}/{year}/*{var}.nc", coords="minimal")
+                ds=xr.open_mfdataset(f"{conv_dir}/{exp}/{year}/*{var.replace('X','_')}.nc", coords="minimal")
             else:
                 ds = xr.open_mfdataset(f"{conv_dir}/{exp}/{year}/*.nc", coords="minimal")
             ds_exp.append(ds)
