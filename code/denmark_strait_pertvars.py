@@ -21,6 +21,13 @@ sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
 from inputs import SOLN_DIR, ecco_grid, EXPDIR, GRIDDIR
 
+attrs = {
+    "contact": "emmomp@bas.ac.uk",
+    "references": "Data from perturbation experiments based on ECCOv4r4 from Boland et al (in prep)",
+    "date": "Created on " + date.today().strftime("%d/%m/%Y"),
+    "notes": "Data produced by analysis of the ECCOv4r4 state estimate, see ecco-group.org",
+}
+
 SECTION = "Denmark Strait"
 pert='pert_10y_tauu_NGlandJANpulse'
 startdate=np.datetime64('1992-01-01T12:00:00')
@@ -48,5 +55,5 @@ ds_perts=xr.concat([ds_plus,ds_minus],'type')
 ds_perts['FWC']=((1-ds_perts.SALT/Sref)*ecco_grid.drF*ecco_grid.hFacC*ecco_grid.rA).sum('k')
 ds_perts['FWC_z']=((1-ds_perts.SALT/Sref)*ecco_grid.drF*ecco_grid.hFacC*ecco_grid.rA)
 ds_section=ds_perts.chunk({'time':121,'k':50,'tile':1,'j':20,'i':20}).where(line_maskC,drop=True).squeeze().stack({'ji':['j','i']}).dropna('ji').sortby('XC')
-
+ds_section.attrs.update(attrs)
 ds_section.reset_index('ji').to_netcdf(f'../data_out/perts/{SECTION.replace(" ","_")}_{pert}.nc')

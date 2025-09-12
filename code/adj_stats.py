@@ -22,6 +22,11 @@ import xadjoint as xad
 import utils as ut
 from inputs import GRIDDIR, EXPDIR, eyears, mthi
 
+attrs={'contact':'emmomp@bas.ac.uk',
+       'references':'ECCOv4r4 Denmark Strait FW flux reconstructions from Boland et al. 2025 (inprep)',
+       'date':'Created on '+date.today().strftime("%d/%m/%Y"),
+       'notes':'Data produced by analysis of the ECCOv4r4 global ocean state estimate, see ecco-group.org'}
+
 #mths = ["Mar", "Jun", "Sep", "Dec"]
 mths=['Jan','Feb','Apr','May','Jul','Aug','Oct','Nov']
 ADJ_FREQ = 604800
@@ -52,4 +57,5 @@ for mth in mths:
         if hasattr(myexp,'fc'):
             myexp.data = myexp.data.assign_coords({ "fc": myexp.fc})
         data_stats = ut.calc_tseries(myexp.data.chunk({'tile':-1,'j':-1,'i':-1}))
+        data_stats.attrs.update(attrs)
         data_stats.to_netcdf(f"{EXPDIR}/{EXPT}/{EXPT[:-1]}_stats.nc")

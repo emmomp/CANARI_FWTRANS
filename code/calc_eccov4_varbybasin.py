@@ -16,6 +16,13 @@ import xarray as xr
 import utils as ut
 from inputs import EXPDIR, DATA_DIR, ecco_grid
 
+attrs = {
+    "contact": "emmomp@bas.ac.uk",
+    "references": "ECCOv4r4 data from Boland et al (in prep)",
+    "date": "Created on " + date.today().strftime("%d/%m/%Y"),
+    "notes": "Data produced by analysis of the ECCOv4r4 state estimate, see ecco-group.org",
+}
+
 ds_climanom=xr.open_dataset(f'{EXPDIR}/fwd_26y/exf_climanoms.nc').drop_vars(['oceTAUX','oceTAUY'])
 ds_ca_monvar=ds_climanom.groupby(ds_climanom.time.dt.month).var('time')
 
@@ -26,5 +33,5 @@ for basin in my_masks:
     rA_bybasin.append(ecco_grid['rA'].where(my_masks[basin]).sum().assign_coords({"mask": basin}))
 rA_bybasin=xr.concat(rA_bybasin,'mask',coords='minimal')
 ds_basinmean=ds_ca_mv_bybasin/rA_bybasin
-
+ds_basinmean.attrs.update(attrs)
 ds_basinmean.to_netcdf(f'{DATA_DIR}/eccov4_varbybasin.nc')

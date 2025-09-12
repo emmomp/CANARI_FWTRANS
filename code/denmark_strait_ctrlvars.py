@@ -20,6 +20,13 @@ sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
 from inputs import SOLN_DIR, ecco_grid
 
+attrs = {
+    "contact": "emmomp@bas.ac.uk",
+    "references": "ECCOv4r4 data from Boland et al (in prep)",
+    "date": "Created on " + date.today().strftime("%d/%m/%Y"),
+    "notes": "Data produced by analysis of the ECCOv4r4 state estimate, see ecco-group.org",
+}
+
 SECTION = "Denmark Strait"
 
 [section_pt1, section_pt2] = ecco.get_section_endpoints(SECTION)
@@ -45,4 +52,5 @@ base_mask.name='halocline_mask'
 base_mask=base_mask.assign_coords({'Z':ecco_grid['Z']})
 base_depth.name='halocline_depth'
 ds_out=xr.merge([base_mask,base_depth.drop_vars(['Z','PHrefC','drF'])])
+ds_out.attrs.update(attrs)
 ds_out.reset_index('ji').to_netcdf(f'../data_out/{SECTION.replace(" ","_")}_halocline.nc')

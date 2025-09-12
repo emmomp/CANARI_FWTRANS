@@ -21,6 +21,13 @@ sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
 from inputs import EXPDIR, GRIDDIR, ecco_grid, oce_vars
 
+attrs = {
+    "contact": "emmomp@bas.ac.uk",
+    "references": "ECCOv4r4 data from Boland et al (in prep)",
+    "date": "Created on " + date.today().strftime("%d/%m/%Y"),
+    "notes": "Data produced by analysis of the ECCOv4r4 state estimate, see ecco-group.org",
+}
+
 exf_ds = []
 STARTDATE = "1992-01-01"
 RHOCONST = 1029
@@ -60,7 +67,8 @@ if "oceQnet" in oce_vars:
 print("Calculating climatology and anomalies, saving")
 ds_clim = exf_ds.groupby(exf_ds.time.dt.month).mean(dim="time").load()
 ds_climanom = exf_ds.groupby(exf_ds.time.dt.month) - ds_clim
-
+ds_clim.attrs.update(attrs)
+ds_climanom.attrs.update(attrs)
 ds_climanom.to_netcdf(f"{EXPDIR}/fwd_26y/exf_climanoms.nc")
 ds_clim.to_netcdf(f"{EXPDIR}/fwd_26y/exf_clim.nc")
 print("Done!")
