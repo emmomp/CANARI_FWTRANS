@@ -49,4 +49,4 @@ ds_perts['FWC']=((1-ds_perts.SALT/Sref)*ecco_grid.drF*ecco_grid.hFacC*ecco_grid.
 ds_perts['FWC_z']=((1-ds_perts.SALT/Sref)*ecco_grid.drF*ecco_grid.hFacC*ecco_grid.rA)
 ds_section=ds_perts.chunk({'time':121,'k':50,'tile':1,'j':20,'i':20}).where(line_maskC,drop=True).squeeze().stack({'ji':['j','i']}).dropna('ji').sortby('XC')
 
-ds_section.reset_index('ji').to_netcdf(f'../data_out/{SECTION.replace(" ","_")}_{pert}.nc')
+ds_section.reset_index('ji').to_netcdf(f'../data_out/perts/{SECTION.replace(" ","_")}_{pert}.nc')
