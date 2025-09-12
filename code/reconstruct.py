@@ -14,12 +14,9 @@ Updated Mar 2025
 @author: emmomp@bas.ac.uk Emma J D Boland
 """
 
-import glob
 from datetime import date
-import dask
 import xarray as xr
-import numpy as np
-from inputs import *
+from inputs import FCNAME, EXPDIR, CONV_DIR, EV_DIR, RECON_DIR, ecco_convs, eyears
 import utils as ut
 
 EXPT = "fwd_26y"
@@ -41,35 +38,26 @@ for eyear in eyears[2:]:
     print(f"Calculating reconstructions for {eyear}")
 
     conv_ecco,cexps_mdict,cexps_edict=ut.load_ecco_convs(CONV_DIR, eyear)
-    conv_ecco=conv_ecco[ecco_convs['all']].chunk('auto')
+    conv_ecco=conv_ecco[ecco_convs].chunk('auto')
 
     dJpred_ecco = conv_ecco.sum(dim="lag_years")
-    dJpred_ecco["wind_EXF"] = (
-        dJpred_ecco["adxx_tauuXEXFtauu_sum"] + dJpred_ecco["adxx_tauvXEXFtauv_sum"]
-    )
     dJpred_ecco["wind_OCE"] = (
         dJpred_ecco["adxx_tauuXoceTAUU_sum"] + dJpred_ecco["adxx_tauvXoceTAUV_sum"]
     )
-    dJpred_ecco["all_OCE"] = dJpred_ecco[ecco_convs["OCE"]].to_array().sum("variable")
-    dJpred_ecco["all_EXF"] = dJpred_ecco[ecco_convs["EXF"]].to_array().sum("variable")
+    dJpred_ecco["all_OCE"] = dJpred_ecco[ecco_convs].to_array().sum("variable")
 
     dJpred_ecco_cumsum = conv_ecco.cumsum("lag_years").assign_coords(
         dates=dJpred_ecco.dates
     )
-    dJpred_ecco_cumsum["wind_EXF"] = (
-        dJpred_ecco_cumsum["adxx_tauuXEXFtauu_sum"]
-        + dJpred_ecco_cumsum["adxx_tauvXEXFtauv_sum"]
-    )
+
     dJpred_ecco_cumsum["wind_OCE"] = (
         dJpred_ecco_cumsum["adxx_tauuXoceTAUU_sum"]
         + dJpred_ecco_cumsum["adxx_tauvXoceTAUV_sum"]
     )
     dJpred_ecco_cumsum["all_OCE"] = (
-        dJpred_ecco_cumsum[ecco_convs["OCE"]].to_array().sum("variable")
+        dJpred_ecco_cumsum[ecco_convs].to_array().sum("variable")
     )
-    dJpred_ecco_cumsum["all_EXF"] = (
-        dJpred_ecco_cumsum[ecco_convs["EXF"]].to_array().sum("variable")
-    )
+
     dJpred_ecco_cumsum = dJpred_ecco_cumsum.assign_coords(conv_ecco.coords)
 
     dJ_vars = dJpred_ecco.squeeze().stack(yearexp=["exp", "year"]).sortby("dates")
@@ -87,7 +75,7 @@ for eyear in eyears[2:]:
     )
     lagmax_ds.name = "lag_max"
 
-    for var in ecco_convs["all"] + ["wind_OCE", "wind_EXF", "all_OCE", "all_EXF"]:
+    for var in ecco_convs + ["wind_OCE", "all_OCE"]:
         print("Writing reconstructions")
         print(f"Full reconstruction, {var}")
         YY = (

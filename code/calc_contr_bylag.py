@@ -12,12 +12,9 @@ Updated Mar 2025
 
 @author: emmomp@bas.ac.uk Emma J D Boland
 """
-import sys
-import glob
 from datetime import date
-import xarray as xr
 import utils as ut
-from inputs import *
+from inputs import CONV_DIR, CONTR_DIR, ecco_convs_2d, eyears
 
 attrs = {
     "contact": "emmomp@bas.ac.uk",
@@ -46,27 +43,33 @@ for eyear in eyears:
 
     for ilag in range(0, len(lags) - 1):
         print(f"Calculating {lag_labels[ilag]}")
-        fout = f"{CONTR_DIR}/{eyear}/ecco_2dconvs_{eyear}_{lag_flabels[ilag]}.nc"
+        FOUT = f"{CONTR_DIR}/{eyear}/ecco_2dconvs_{eyear}_{lag_flabels[ilag]}.nc"
         ds_exp = (
             conv_ecco[ecco_convs_2d]
-            .sel(lag_years=slice(lags[ilag], lags[ilag+1]))
+            .sel(lag_years=slice(lags[ilag], lags[ilag + 1]))
             .sum("lag_years")
             .squeeze()
         )
         ds_exp = ds_exp.assign_coords(
-            {"lag_range": lag_labels[ilag], "month":('exp',[cexps_mdict[exp] for exp in ds_exp.exp.data])}
+            {
+                "lag_range": lag_labels[ilag],
+                "month": ("exp", [cexps_mdict[exp] for exp in ds_exp.exp.data]),
+            }
         )
-        ds_exp.to_netcdf(fout)
+        ds_exp.to_netcdf(FOUT)
     ilag += 1
-    fout = f"{CONTR_DIR}/{eyear}/ecco_convs_{eyear}_{lag_flabels[ilag]}.nc"
+    FOUT = f"{CONTR_DIR}/{eyear}/ecco_convs_{eyear}_{lag_flabels[ilag]}.nc"
     ds_exp = (
         conv_ecco[ecco_convs_2d]
-        .sel(lag_years=slice(0,lags[-1]))
+        .sel(lag_years=slice(0, lags[-1]))
         .sum("lag_years")
         .squeeze()
     )
     ds_exp = ds_exp.assign_coords(
-        {"lag_range": lag_labels[-1], "month": [cexps_mdict[exp] for exp in ds_exp.exp.data]}
+        {
+            "lag_range": lag_labels[-1],
+            "month": [cexps_mdict[exp] for exp in ds_exp.exp.data],
+        }
     )
     ds_exp.attrs.update(attrs)
-    ds_exp.to_netcdf(fout)
+    ds_exp.to_netcdf(FOUT)

@@ -38,7 +38,8 @@ def convolve_ecco(
 ):
     """
     Function to convolve ECCO adjoint sensitivities with given fields to produce convolutions
-    ECCO data regridded to convolve data if regrid=True, and, if convolve data is time-dependent, the sensetivities are resampled in time to match
+    ECCO data regridded to convolve data if regrid=True, and, if convolve data is time-dependent, 
+    the sensitivities are resampled in time to match
 
     Parameters
     ----------
@@ -47,7 +48,8 @@ def convolve_ecco(
     convolve_data : xarray dataset
       Fields to convolve with ECCO data
     ecco_convolve_map : dict
-      Mapping from each ecco_data variable to convolve_data variable or list of variables. Used to match variables to convolve together
+      Mapping from each ecco_data variable to convolve_data variable or list of variables. 
+      Used to match variables to convolve together
     regrid : logical
       If True (default), regrid ecco_data to convolve_data grid, must have variables 'lon' and 'lat'
     ecco_grid : xarray dataset
@@ -66,7 +68,7 @@ def convolve_ecco(
     -------
     data_all : xarray dataset
       Convolved data, returned as variables with names '[ecco_var]X[convolve_var]',
-      where 'ecco_var' and 'convolve_var' are variables from ecco_data and convolve_data respectively
+      'ecco_var' and 'convolve_var' are variables from ecco_data and convolve_data respectively
     """
 
     if regrid:
@@ -80,21 +82,11 @@ def convolve_ecco(
     for var, conv_var in ecco_convolve_map.items():
         data_all_var = []
         if dir_out is not None:
-            if len(conv_var) > 1:
-                ftest = []
-                for cvar in conv_var:
-                    fout = dir_out + f"/ECCOconv_{var}_{cvar}.nc"
-                    ftest.append(os.path.isfile(fout))
-                if all(ftest):
-                    if not overwrite:
-                        print(f"Found all {var} files, skipping")
-                        continue
-            else:
-                fout = dir_out + f"/ECCOconv_{var}.nc"
-                if os.path.isfile(fout):
-                    if not overwrite:
-                        print(f"Found {var} file, skipping")
-                        continue
+            fout = dir_out + f"/ECCOconv_{var}_{conv_var}.nc"
+            if os.path.isfile(fout):
+                if not overwrite:
+                    print(f"Found {var} file, skipping")
+                    continue
 
         print(var)
         # Select sensitivity for transp and year
@@ -112,72 +104,71 @@ def convolve_ecco(
                 sens["time"] = ecco_data["time"]
 
         data_out = None
-        for cvar in ecco_convolve_map[var]:
-            if cvar not in convolve_data:
-                continue
-            print(cvar)
-            if dir_out is not None:
-                fout = dir_out + f"/ECCOconv_{var}_{cvar}.nc"
-                if os.path.isfile(fout):
-                    if not overwrite:
-                        print(f"Found {var} file, skipping")
-                        continue
+        if conv_var not in convolve_data:
+            continue
+        print(conv_var)
+        if dir_out is not None:
+            fout = dir_out + f"/ECCOconv_{var}_{conv_var}.nc"
+            if os.path.isfile(fout):
+                if not overwrite:
+                    print(f"Found {var} file, skipping")
+                    continue
 
-            # Resample in time to match convolve_data if necessary
-            if "time" in convolve_data:
-                if convolve_data[cvar]["time"].size > 1:
-                    if "time" not in sens.dims:
-                        sens = sens.swap_dims({"lag_years": "time"})
-                    cdata = convolve_data[cvar].interp(time=sens["time"])
-                    data_convolve = sens * cdata
-                    data_convolve = data_convolve.swap_dims({"time": "lag_years"})
-                    data_convolve = data_convolve.dropna("lag_years", how="all")
-                else:
-                    data_convolve = sens * convolve_data[cvar]
-            elif "month" in convolve_data:
+        # Resample in time to match convolve_data if necessary
+        if "time" in convolve_data:
+            if convolve_data[conv_var]["time"].size > 1:
                 if "time" not in sens.dims:
                     sens = sens.swap_dims({"lag_years": "time"})
-                sens = sens.groupby(sens.time.dt.month)
-                cdata = convolve_data[cvar]
+                cdata = convolve_data[conv_var].interp(time=sens["time"])
                 data_convolve = sens * cdata
                 data_convolve = data_convolve.swap_dims({"time": "lag_years"})
                 data_convolve = data_convolve.dropna("lag_years", how="all")
-
             else:
-                # Perform convolution
-                data_convolve = sens * convolve_data[cvar]
+                data_convolve = sens * convolve_data[conv_var]
+        elif "month" in convolve_data:
+            if "time" not in sens.dims:
+                sens = sens.swap_dims({"lag_years": "time"})
+            sens = sens.groupby(sens.time.dt.month)
+            cdata = convolve_data[conv_var]
+            data_convolve = sens * cdata
+            data_convolve = data_convolve.swap_dims({"time": "lag_years"})
+            data_convolve = data_convolve.dropna("lag_years", how="all")
 
-            # Take sums (sensitivities already area weighted)
-            dims = list(data_convolve.dims)
-            dims.remove("lag_years")
-            if "model" in dims:
-                dims.remove("model")
-            data_convolve_sum = data_convolve.sum(dim=dims)
-            data_convolve_abssum = np.abs(data_convolve).sum(dim=dims)
-            data_convolve_square_sum = (data_convolve**2).sum(dim=dims)
+        else:
+            # Perform convolution
+            data_convolve = sens * convolve_data[conv_var]
 
-            # Put in a dataset
-            out_dict = {
-                f"{var}X{cvar}": data_convolve,
-                f"{var}X{cvar}_sum": data_convolve_sum,
-                f"{var}X{cvar}_abssum": data_convolve_abssum,
-                f"{var}X{cvar}_squaresum": data_convolve_square_sum,
-            }
-            data_out = xr.Dataset(data_vars=out_dict)
+        # Take sums (sensitivities already area weighted)
+        dims = list(data_convolve.dims)
+        dims.remove("lag_years")
+        if "model" in dims:
+            dims.remove("model")
+        data_convolve_sum = data_convolve.sum(dim=dims)
+        data_convolve_abssum = np.abs(data_convolve).sum(dim=dims)
+        data_convolve_square_sum = (data_convolve**2).sum(dim=dims)
 
-            data_out["year"] = (
-                "year",
-                [
-                    year,
-                ],
-            )
+        # Put in a dataset
+        out_dict = {
+            f"{var}X{conv_var}": data_convolve,
+            f"{var}X{conv_var}_sum": data_convolve_sum,
+            f"{var}X{conv_var}_abssum": data_convolve_abssum,
+            f"{var}X{conv_var}_squaresum": data_convolve_square_sum,
+        }
+        data_out = xr.Dataset(data_vars=out_dict)
 
-            data_all_var.append(data_out)
-            if dir_out:
-                if attrs:
-                    data_out.attrs.update(attrs)
-                data_out.to_netcdf(fout)
-                print("Written to", fout)
+        data_out["year"] = (
+            "year",
+            [
+                year,
+            ],
+        )
+
+        data_all_var.append(data_out)
+        if dir_out:
+            if attrs:
+                data_out.attrs.update(attrs)
+            data_out.to_netcdf(fout)
+            print("Written to", fout)
 
         data_all_var = xr.merge(data_all_var)
         data_all.append(data_all_var)

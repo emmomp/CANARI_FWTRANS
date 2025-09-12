@@ -16,7 +16,7 @@ import os.path
 from datetime import date
 import xarray as xr
 import utils as ut
-from inputs import *
+from inputs import FCNAME, EXPDIR, CONV_DIR, EV_DIR, ecco_convs, eyears, ecco_convs_2d, ecco_grid
 
 attrs = {
     "contact": "emmomp@bas.ac.uk",
@@ -40,53 +40,58 @@ lag_labels = [
 EXPT = "fwd_26y"
 fc = ut.get_soln(FCNAME, f"{EXPDIR}/{EXPT}")
 fc_climanom, fc_mth = ut.soln_anoms(fc)
-    
+
+
 def main():
-    out={}
-    
+    out = {}
+
     for eyear in eyears:
         print(eyear)
-        out[eyear]={}
+        out[eyear] = {}
 
-        conv_ecco,_,_ = ut.load_ecco_convs(CONV_DIR, eyear)
+        conv_ecco, _, _ = ut.load_ecco_convs(CONV_DIR, eyear)
 
         print("Calculating global EV time series")
 
-        dJpred_var_bylag = conv_ecco[ecco_convs["all"]].squeeze().chunk('auto')
+        dJpred_var_bylag = conv_ecco[ecco_convs].squeeze().chunk("auto")
 
         fout = f"{EV_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_{eyear}.nc"
-        out[eyear]['ev_total'] = calc_ev_1d(fout, dJpred_var_bylag)
+        out[eyear]["ev_total"] = calc_ev_1d(fout, dJpred_var_bylag)
         fout = f"{EV_DIR}/{eyear}/{FCNAME}_ev_bylag_byvar_bymonth_{eyear}.nc"
-        out[eyear]['ev_total_bym'] = calc_ev_1d(fout, dJpred_var_bylag, bymonth=True)
+        out[eyear]["ev_total_bym"] = calc_ev_1d(fout, dJpred_var_bylag, bymonth=True)
 
-        dJpred_ecco_cumsum = (
-             dJpred_var_bylag.cumsum("lag_years").assign_coords(conv_ecco.coords)
+        dJpred_ecco_cumsum = dJpred_var_bylag.cumsum("lag_years").assign_coords(
+            conv_ecco.coords
         )
 
         fout = f"{EV_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_{eyear}.nc"
-        out[eyear]['cum_ev_total'] = calc_ev_1d(fout, dJpred_ecco_cumsum)
+        out[eyear]["cum_ev_total"] = calc_ev_1d(fout, dJpred_ecco_cumsum)
         fout = f"{EV_DIR}/{eyear}/{FCNAME}_cumev_bylag_byvar_bymonth_{eyear}.nc"
-        out[eyear]['cum_ev_total_bym'] = calc_ev_1d(fout, dJpred_ecco_cumsum, bymonth=True)
+        out[eyear]["cum_ev_total_bym"] = calc_ev_1d(
+            fout, dJpred_ecco_cumsum, bymonth=True
+        )
 
         print("calculating 2-D EV")
-        out[eyear]['ev_2d_full']={}
-        out[eyear]['ev_2d_bym']={}
+        out[eyear]["ev_2d_full"] = {}
+        out[eyear]["ev_2d_bym"] = {}
         for var in ecco_convs_2d:
             print(var)
             dJ_2d = conv_ecco[var]
 
             fout = f"{EV_DIR}/{FCNAME}_fullEV2d_{var}_{eyear}.nc"
-            out[eyear]['ev_2d_full'][var] = calc_ev_2d(fout, dJ_2d, lags, lag_labels)
+            out[eyear]["ev_2d_full"][var] = calc_ev_2d(fout, dJ_2d, lags, lag_labels)
             fout = f"{EV_DIR}/{FCNAME}_monthlyEV2d_{var}_{eyear}.nc"
-            out[eyear]['ev_2d_bym'][var] = calc_ev_2d(fout, dJ_2d, lags, lag_labels, bymonth=True)
-        
+            out[eyear]["ev_2d_bym"][var] = calc_ev_2d(
+                fout, dJ_2d, lags, lag_labels, bymonth=True
+            )
+
     return out
 
-            
+
 def calc_ev_1d(file, dJ, bymonth=False):
     """
     Calculates expected variance time series of provided reconstructions and writes to file
-    
+
     Parameters
     ----------
     file : str
@@ -108,28 +113,28 @@ def calc_ev_1d(file, dJ, bymonth=False):
     dJ = dJ.chunk({"year": -1}).sel(year=slice(1996, None))
     if bymonth:
         dJ = dJ.swap_dims({"exp": "month"})
-        fc = fc_mth.sel(year=slice(1996, None))
+        fc_ev = fc_mth.sel(year=slice(1996, None))
         vardim = "year"
     else:
         dJ = dJ.stack(yearexp=["exp", "year"]).swap_dims({"yearexp": "dates"})
-        fc = fc_climanom.sel(time=slice("1996-01-01", None)).rename({"time": "dates"})
+        fc_ev = fc_climanom.sel(time=slice("1996-01-01", None)).rename({"time": "dates"})
         vardim = "dates"
 
-    dJ["wind_EXF"] = dJ["adxx_tauuXEXFtauu_sum"] + dJ["adxx_tauvXEXFtauv_sum"]
     dJ["wind_OCE"] = dJ["adxx_tauuXoceTAUU_sum"] + dJ["adxx_tauvXoceTAUV_sum"]
-    dJ["all_EXF"] = dJ[ecco_convs["EXF"]].to_array().sum("variable")
-    dJ["all_OCE"] = dJ[ecco_convs["OCE"]].to_array().sum("variable")
+    dJ["all_OCE"] = dJ[ecco_convs].to_array().sum("variable")
 
-    ev = 1 - (fc - dJ).var(vardim) / fc.var(vardim)
+    ev = 1 - (fc_ev - dJ).var(vardim) / fc_ev.var(vardim)
     print(f"Writing to {file}")
     ev.attrs.update(attrs)
     ev.to_netcdf(file)
     return ev
 
+
 def calc_ev_2d(file, dJ, lag_list, laglabels, bymonth=False):
     """
-    Calculates 2D expected variance of provided contribution fields, integrated over given lags, writes to file
-    
+    Calculates 2D expected variance of provided contribution fields, 
+    integrated over given lags, writes to file
+
     Parameters
     ----------
     file : str
@@ -156,24 +161,24 @@ def calc_ev_2d(file, dJ, lag_list, laglabels, bymonth=False):
     dJ = dJ.chunk({"year": -1}).sel(year=slice(1996, None))
     if bymonth:
         dJ = dJ.swap_dims({"exp": "month"})
-        fc = fc_mth.sel(year=slice(1996, None))
+        fc_ev = fc_mth.sel(year=slice(1996, None))
         vardim = "year"
     else:
         dJ = dJ.stack(yearexp=["exp", "year"]).swap_dims({"yearexp": "dates"})
-        fc = fc_climanom.sel(time=slice("1996-01-01", None)).rename({"time": "dates"})
+        fc_ev = fc_climanom.sel(time=slice("1996-01-01", None)).rename({"time": "dates"})
         vardim = "dates"
 
     for ilag in range(0, len(lag_list) - 1):
         dJ_lag = dJ.sel(lag_years=slice(lag_list[ilag], lag_list[ilag + 1])).sum(
             "lag_years"
         )
-        ev_2d = (1 - (fc - dJ_lag).var(vardim) / fc.var(vardim)).assign_coords(
+        ev_2d = (1 - (fc_ev - dJ_lag).var(vardim) / fc_ev.var(vardim)).assign_coords(
             lag=laglabels[ilag]
         )
         ev_out.append(ev_2d / ecco_grid.rA)
     ilag += 1
     dJ_lag = dJ.sel(lag_years=slice(None, lag_list[-1])).sum("lag_years")
-    ev_2d = (1 - (fc - dJ_lag).var(vardim) / fc.var(vardim)).assign_coords(
+    ev_2d = (1 - (fc_ev - dJ_lag).var(vardim) / fc_ev.var(vardim)).assign_coords(
         lag=laglabels[ilag]
     )
     ev_out.append(ev_2d / ecco_grid.rA)
@@ -183,6 +188,6 @@ def calc_ev_2d(file, dJ, lag_list, laglabels, bymonth=False):
     ev_out.to_netcdf(file)
     return ev_out
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     main()
-    

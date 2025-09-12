@@ -16,7 +16,7 @@ import xarray as xr
 import utils as ut
 from inputs import EXPDIR, DATA_DIR, ecco_grid
 
-ds_climanom=xr.open_dataset(f'{EXPDIR}/fwd_26y/exf_climanoms.nc').drop_vars(['EXFtaux','EXFtauy','oceTAUX','oceTAUY'])
+ds_climanom=xr.open_dataset(f'{EXPDIR}/fwd_26y/exf_climanoms.nc').drop_vars(['oceTAUX','oceTAUY'])
 ds_ca_monvar=ds_climanom.groupby(ds_climanom.time.dt.month).var('time')
 
 my_masks=ut.load_canari_masks()
