@@ -24,5 +24,11 @@ To reproduce the paper's figures and tables, follow these steps:
 ## Steps to reproduce the paper's analysis from model output
 
 To reproduce the data files required to produce the figures, follow these steps:
+- Rerun the paper's experiments (see "Steps to rerun the model experiments")
+- Install the necessary python libraries (see [code/requirements.txt](code/requirements.txt))
+- Run the python scripts in [code](code/)
 
 ## Steps to rerun the model experiments
+
+Take my published version of [ECCOv4r4](https://github.com/emmomp/ECCO-v4-Configurations/releases/tag/v1.1), 
+using code_noparam to compile and namelist_adjsen when running, with masks generated using code/generate_masks.py 
