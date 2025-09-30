@@ -11,7 +11,7 @@ Emma Boland Sep 2025 [emmomp@bas.ac.uk](mailto:emmomp@bas.ac.uk)
 
 Third-part requirements are found notebooks/requirements.txt and code/requirements.txt. Additionally, two further requirements are:
 - My forked version of [ECCOv4-py](https://github.com/emmomp/ECCOv4-py/tree/fw_transports) which includes the ability to calculate freshwater transports from model diagnostics as well as some updates to plotting tools.
-- [xadjoint][], a tool I created to read adjoint sensitivity experiments, which automatically generates time step and lagged time metadata, based on xmitgcm.
+- [xadjoint](https://github.com/emmomp/xadjoint), a tool for reading and analysing adjoint sensitivity experiments from MITgcm, which automatically generates time step and lagged time metadata, based on xmitgcm.
 
 ## Steps to reproduce the paper's figures and tables
 
@@ -24,5 +24,11 @@ To reproduce the paper's figures and tables, follow these steps:
 ## Steps to reproduce the paper's analysis from model output
 
 To reproduce the data files required to produce the figures, follow these steps:
+- Rerun the paper's experiments (see "Steps to rerun the model experiments")
+- Install the necessary python libraries (see [code/requirements.txt](code/requirements.txt))
+- Run the python scripts in [code](code/)
 
 ## Steps to rerun the model experiments
+
+Take my published version of [ECCOv4r4](https://github.com/emmomp/ECCO-v4-Configurations/releases/tag/v1.1), 
+using code_noparam to compile and namelist_adjsen when running, with masks generated using code/generate_masks.py 
