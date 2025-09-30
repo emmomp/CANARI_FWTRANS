@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-adj_stats.py
+generate_masks.py
 
-Calculate mean and abs mean time series of adjoint sensitivities
+Generate space and time masks for adjoint sensitivity experiments
 
 Required to reproduce data for Boland et al. 2025 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
