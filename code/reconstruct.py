@@ -30,10 +30,6 @@ attrs = {
     see ecco-group.org",
 }
 
-print("Loading solution")
-fc = ut.get_soln(FCNAME, f"{EXPDIR}/{EXPT}")
-fc_climanom, fc_mth = ut.soln_anoms(fc)
-
 for eyear in eyears[2:]:
     print(f"Calculating reconstructions for {eyear}")
 
