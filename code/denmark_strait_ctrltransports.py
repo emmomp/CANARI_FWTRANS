@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-denmark_strait_transports.py
+denmark_strait_ctrltransports.py
 
 Calculate Denmark Strait Transports in the ECCOv4r4 solution
 

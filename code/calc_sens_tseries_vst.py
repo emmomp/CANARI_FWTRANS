@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-calc_eccov4_varbybasin.py
+calc_sens_tseries_vst.py
 
 Code to calculate time series of ECCOv4r4 adjoint sensitivities by basin vs time.
 

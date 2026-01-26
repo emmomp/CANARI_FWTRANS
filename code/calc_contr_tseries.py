@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-reconst_contr_tseries.py
+calc_contr_tseries.py
 
 Code to calculate basin integrals of contributions to ECCOv4r4 Denmark Strait Freshwater Flux.
 
