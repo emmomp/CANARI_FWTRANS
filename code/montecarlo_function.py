@@ -1,5 +1,18 @@
+#!/usr/bin/env python3
+# coding: utf-8
+"""
+montecarlo_function.py
+
+Calculate bootstrapped p-values for correlation and explained variance calculations
+
+Required to reproduce data for Boland et al. 2025 (in prep)
+See https://github.com/emmomp/CANARI_FWTRANS for details
+
+Updated Jan 2026
+
+@author: emmomp@bas.ac.uk Emma J D Boland, based on original matlab code by Chris Hughes, Liverpool
+"""
 import numpy as np
-import matplotlib.pyplot as plt
 
 def MonteCarlo_function(series1, series2, R_actual, times_replicate=1000):
     series1M=montecarlo(series1,times_replicate)
@@ -11,9 +24,6 @@ def MonteCarlo_function(series1, series2, R_actual, times_replicate=1000):
             RR[i,j]=corr[0,1]
     RRR=RR.ravel()
     RRR_above=RRR[np.abs(RRR)>=np.abs(R_actual)]
-
-    plt.figure
-    plt.hist(RRR)
 
     fracLevP=len(RRR_above)/len(RRR)
 
@@ -29,9 +39,6 @@ def MonteCarlo_EV(series1, series2, EV_actual, times_replicate=1000):
             RR[i,j]=1-np.var(series1M[:,i]-series2M[:,j])/var_sol
     RRR=RR.ravel()
     RRR_above=RRR[RRR>=EV_actual]
-
-    plt.figure
-    plt.hist(RRR)
 
     fracLevP=len(RRR_above)/len(RRR)
 
