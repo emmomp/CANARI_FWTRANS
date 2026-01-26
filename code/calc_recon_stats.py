@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+# coding: utf-8
+"""
+calc_recon_stats.py
+
+Calculate correlation and explained variance statistics for reconstructions of Denmark Strait freshwater fluxes, including bootstrapped p-values.
+
+Required to reproduce data for Boland et al. 2026 (in prep)
+See https://github.com/emmomp/CANARI_FWTRANS for details
+
+Updated Jan 2026
+
+@author: emmomp@bas.ac.uk Emma J D Boland
+"""
 import xarray as xr
 import numpy as np
 import utils as ut
