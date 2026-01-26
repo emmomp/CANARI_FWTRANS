@@ -28,7 +28,7 @@ FCNAME = "horflux_fw_denm"
 
 ecco_grid=xr.open_dataset('/data/expose/ECCOv4-r4/Version4/Release4/nctiles_grid/ECCO-GRID.nc') 
 
-eyears = ["2006", "2014", "2000"]
+eyears = ["2000", "2006", "2014"]
 adj_diag_map = {
     "adxx_qnet": "oceQnet",
     "adxx_tauu": "oceTAUU",
@@ -40,7 +40,7 @@ adj_units=dict(zip(['adxx_qnet','adxx_empmr','adxx_tauu','adxx_tauv'],['W/m$^2$'
 adj_labels=dict(zip(['adxx_qnet','adxx_empmr','adxx_tauu','adxx_tauv'],['Net Heat Flux','Net Freshwater Flux','Zonal Wind Stress','Meridional Wind Stress']))
 
 oce_vars=["oceQnet","oceTAUU", "oceTAUV", "oceFWflx","wind_OCE"]
-exf_units=dict(zip(oce_vars,['W/m$^2$','m$^2$/s','m$^2$/s','m/s','m$^2$/s']))
+exf_units=dict(zip(oce_vars+['EXFtauu',],['W/m$^2$','m$^2$/s','m$^2$/s','m/s','m$^2$/s','m$^2$/s']))
 exf_labels=dict(zip(oce_vars,['Net Heat Flux','Zonal Wind Stress','Meridional Wind Stress','Net Freshwater Flux','Wind Stress']))
 
 masks_labels=dict(zip(['global','egland','natl','arct','gin','hudson', 'north', 'baffin','barents','gland','norw'],['Global','E Gland','N Atlantic','Arctic','GIN','Hudson','North','Baffin','Barents','Greenland','Norwegian']))
