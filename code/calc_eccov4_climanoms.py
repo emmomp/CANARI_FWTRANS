@@ -6,7 +6,7 @@ calc_eccov4_climanoms.py
 Code to calculate climatological anomalies of ECCOv4r4 weekly mean ocean forcing fields, 
 generated from diagnostic fields found in {EXPDIR}/fwd_26y/diags/.
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Sep 2025

@@ -5,12 +5,12 @@ montecarlo_function.py
 
 Calculate bootstrapped p-values for correlation and explained variance calculations
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Jan 2026
 
-@author: emmomp@bas.ac.uk Emma J D Boland, based on original matlab code by Chris Hughes, Liverpool
+@author: emmomp@bas.ac.uk Emma J D Boland, based on original matlab code by Chris Hughes, NOC Liverpool
 """
 import numpy as np
 

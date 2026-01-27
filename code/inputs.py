@@ -3,7 +3,7 @@
 """
 Inputs for other scripts, mostly directory locations and metadata
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Mar 2025

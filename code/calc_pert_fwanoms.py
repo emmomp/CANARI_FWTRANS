@@ -5,7 +5,11 @@ calc_pert_fwanoms.py
 
 Calculate fresh water anomalies from ECCOv4r4 perturbation experiments
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Requires:
+- Diagnostic from files from perturbation experiments to ECCOv4r4, using the xx_tauu.0000000129.data.{pert}_{pert_sign} files 
+- xx_tauu.0000000129.data.{pert}_{pert_sign}, in ../other_data, were created using make_perts.py
+
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Sep 2025

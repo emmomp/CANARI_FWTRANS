@@ -5,7 +5,9 @@ calc_contr_tseries.py
 
 Code to calculate basin integrals of contributions to ECCOv4r4 Denmark Strait Freshwater Flux.
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Requires convolution data produced by running convolve.py
+
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Mar 2025

@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-reconst_denm_highfreq_all.py
+reconstruct_perts.py
 
 Code to reconstruct ECCOv4r4 Denmark Strait Freshwater Flux perturbations from
 adjoint sensitivities and applied perturbation fields.
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Requires:
+- {DATA_DIR}/*pertfields.nc, created using calc_pert_forcinganoms.py
+- sensitivity fields adxx_{var}.0000000129.data/meta, in {EXPDIR}/{expt}, generated from adjoint sensitivity experiments as described in Boland et al. 2026
+
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Sep 2025

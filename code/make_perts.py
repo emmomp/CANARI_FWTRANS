@@ -5,7 +5,7 @@ generate_masks.py
 
 Generate perturbation xx_ files based on adjoint sensitivities
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Sep 2025

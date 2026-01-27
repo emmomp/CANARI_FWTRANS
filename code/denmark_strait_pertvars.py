@@ -5,7 +5,11 @@ denmark_strait_ctrlvars.py
 
 Extract variables from Denmark Strait in perturbations to the ECCOv4r4 solution
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Requires:
+- Diagnostic from files from perturbation experiments to ECCOv4r4, using the xx_tauu.0000000129.data.{pert}_{pert_sign} files 
+- xx_tauu.0000000129.data.{pert}_{pert_sign}, in ../other_data, were created using make_perts.py
+
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Jun 2025

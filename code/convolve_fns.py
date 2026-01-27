@@ -5,7 +5,7 @@ convolve_fns.py
 
 Code to convolve ECCOv4r4 adjoint sensitivities with other 2-D and 3D fields.
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Feb 2025

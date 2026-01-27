@@ -3,9 +3,9 @@
 """
 generate_masks.py
 
-Generate space and time masks for adjoint sensitivity experiments
+Generate space and time masks for adjoint sensitivity experiments described in Boland et al. 2026, using code found in https://doi.org/10.5281/zenodo.17225253
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Mar 2025

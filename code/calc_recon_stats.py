@@ -5,6 +5,8 @@ calc_recon_stats.py
 
 Calculate correlation and explained variance statistics for reconstructions of Denmark Strait freshwater fluxes, including bootstrapped p-values.
 
+Requires horflux_fw_denm_contr_tseries_*.nc, produced by running calc_contr_tseries.py
+
 Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 

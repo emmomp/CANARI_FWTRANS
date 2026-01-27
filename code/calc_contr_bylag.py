@@ -5,7 +5,9 @@ calc_contr_bylag.py
 
 Calculate 2-D contributions to Denmark Strait FW transport in ECCOv4r4 from convolutions
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Requires convolution data produced by running convolve.py
+
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Mar 2025

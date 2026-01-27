@@ -5,7 +5,7 @@ denmark_strait_ctrltransports.py
 
 Calculate Denmark Strait Transports in the ECCOv4r4 solution
 
-Required to reproduce data for Boland et al. 2025 (in prep)
+Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
 Updated Feb 2025
