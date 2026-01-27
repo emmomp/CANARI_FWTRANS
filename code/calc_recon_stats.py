@@ -23,7 +23,7 @@ import montecarlo_function as mont
 
 var_list = ecco_convs + ["wind_OCE", "all_OCE"]
 conv_var_list = [x.removesuffix("_sum") for x in var_list]
-masks_plot=['global','gland','natl','arct','norw']
+masks_plot=['global','global-arct','gland','natl','arct']
 rtypes = ["full", "opt", "opt_lo", "opt_hi"]
 
 
@@ -212,7 +212,8 @@ for rtype in rtypes:
     ev_aa.name = "EV"
     ev_aa_lo.name = "EV_lower"
     ev_aa_up.name = "EV_upper"
-    ev_p_comb.append(xr.merge([ev_aa, ev_aa_lo, ev_aa_up]))
+    pp.name = "p"
+    ev_p_comb.append(xr.merge([ev_aa, ev_aa_lo, ev_aa_up, pp]))
 ev_p_comb = xr.concat(ev_p_comb, "recon_type").assign_coords({"recon_type": rtypes})
 ev_p_comb.to_netcdf(f"{DATA_DIR}/recon_evstats.nc")
 
