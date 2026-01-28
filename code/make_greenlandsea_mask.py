@@ -5,6 +5,8 @@ make_greenlandsea_mask.py
 
 Generate custom mask of the Greenland Sea
 
+Requires iho_greendlandsea, downloaded from https://www.marineregions.org/gazetteer.php/gazetteer.php?p=details&id=2356 2/5/25
+
 Required to reproduce data for Boland et al. 2026 (in prep)
 See https://github.com/emmomp/CANARI_FWTRANS for details
 
