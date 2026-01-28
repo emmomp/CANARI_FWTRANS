@@ -6,7 +6,8 @@ denmark_strait_perttransports.py
 Calculate Denmark Strait FW & Vol 2-D Transports in perturbation experiments to ECCOv4r4
 
 Requires:
-- Diagnostic from files from perturbation experiments to ECCOv4r4, using the xx_tauu.0000000129.data.{pert}_{pert_sign} files 
+- Diagnostic from files from perturbation experiments to ECCOv4r4, 
+ using the xx_tauu.0000000129.data.{pert}_{pert_sign} files
 - xx_tauu.0000000129.data.{pert}_{pert_sign}, in ../other_data, were created using make_perts.py
 
 Required to reproduce data for Boland et al. 2026 (in prep)
@@ -18,14 +19,15 @@ Updated Sep 2025
 """
 from datetime import date
 import sys
+import numpy as np
 import xarray as xr
-from inputs import SOLN_DIR, ecco_grid, DATA_DIR
 
 sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
+from inputs import ecco_grid, DATA_DIR, EXPDIR, GRIDDIR
 
 SECTION = "Denmark Strait"
-SECTION_LABEL='Den'
+SECTION_LABEL = "Den"
 SREF = 35
 
 [section_pt1, section_pt2] = ecco.get_section_endpoints(SECTION)
@@ -49,19 +51,23 @@ exps = [
     "pert_10y_tauu_NAlaskaJANpulseminus",
 ]
 
+startdate = np.datetime64("1996-01-01")
+
 for exp in exps:
     print(f"Calculating {exp} {SECTION} transports")
-    ds = ecco.recursive_load_ecco_var_from_years_nc(
-        SOLN_DIR,
-        vars_to_load=[
-            "SALT",
-            "UVELMASS",
-            "VVELMASS",
-            "GM_PsiX",
-            "GM_PsiY",
-        ],
-        years_to_load="all",
-    )
+
+    ds = []
+    for var in ["SALT", "UVELMASS", "VVELMASS", "GM_PsiX", "GM_PsiY"]:
+        ds.append(
+            ecco.load_ecco_vars_from_mds(
+                f"{EXPDIR}/{exp}/diags/{var}_mon_mean",
+                mds_grid_dir=GRIDDIR,
+                mds_files=f"{var}_mon_mean",
+                output_freq_code="AVG_MON",
+                model_start_datetime=startdate,
+                read_grid=False,
+            )
+        )
 
     ds = xr.merge([ecco_grid, ds])
 
