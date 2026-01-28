@@ -363,15 +363,3 @@ def load_ecco_convs(conv_dir, eyear, var=None, exp=None):
 
     return conv_ecco,cexps_mdict,cexps_edict
 
-    
-
-                )
-                for i in range(0, 22)
-            ]
-        )
-    conv_ecco = conv_ecco.assign_coords(dates=(["exp", "year"], plotdates))
-    conv_ecco = conv_ecco.assign_coords(month=(["exp"],[cexps_mdict[exp] for exp in conv_ecco.exp.data]))
-    
-    print("Done loading")
-
-    return conv_ecco,cexps_mdict,cexps_edict
