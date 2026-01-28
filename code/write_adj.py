@@ -15,19 +15,23 @@ Updated Jan 2026
 @author: emmomp@bas.ac.uk Emma J D Boland
 """
 import sys
+import calendar
 from datetime import date
 import numpy as np
-sys.path.insert(0,'/users/emmomp/Python/ECCOv4-py')
+
+sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 sys.path.insert(0, "/users/emmomp/Python")
 import xadjoint as xad
-from inputs import EXPDIR, GRIDDIR
+from inputs import EXPDIR, GRIDDIR, eyears, imth
 
-attrs={'contact':'emmomp@bas.ac.uk',
-       'references':'ECCOv4r4 Denmark Strait FW flux reconstructions from Boland\
-       et al. (inprep)',
-       'date':'Created on '+date.today().strftime("%d/%m/%Y"),
-       'notes':'Data produced by analysis of the ECCOv4r4 global ocean state estimate,\
-       see ecco-group.org'}
+attrs = {
+    "contact": "emmomp@bas.ac.uk",
+    "references": "ECCOv4r4 Denmark Strait FW flux reconstructions from Boland\
+       et al. (inprep)",
+    "date": "Created on " + date.today().strftime("%d/%m/%Y"),
+    "notes": "Data produced by analysis of the ECCOv4r4 global ocean state estimate,\
+       see ecco-group.org",
+}
 
 startdates = {"2000": "1996-01-01", "2006": "2002-01-01", "2014": "2010-01-01"}
 
@@ -43,13 +47,13 @@ for eyear in eyears:
         expt = f"ad_5y_denstr_horflux_fw_{imth[iem]}_noparam_7d_{eyear}/"
         print(expt)
         lag0 = np.datetime64(
-                f"{eyear}-{iem:02.0f}-{calendar.monthrange(int(eyear),iem)[1]}"
-            )
+            f"{eyear}-{iem:02.0f}-{calendar.monthrange(int(eyear),iem)[1]}"
+        )
         print(f"start date {STARTDATE}, lag 0 {lag0}")
-    
+
         myexp = xad.Experiment(
             GRIDDIR,
-            f'{EXPDIR}/{expt}',
+            f"{EXPDIR}/{expt}",
             start_date=STARTDATE,
             lag0=lag0,
             nt=NT_ADJ,
@@ -58,6 +62,8 @@ for eyear in eyears:
         myexp.load_vars(["adxx_qnet", "adxx_tauu", "adxx_tauv", "adxx_empmr"])
         myexp.data["adxx_tauu"] = -myexp.data["adxx_tauu"].rename({"i_g": "i"})
         myexp.data["adxx_tauv"] = -myexp.data["adxx_tauv"].rename({"j_g": "j"})
-    
-        myexp.data = myexp.data.assign_coords({"month": iem, "year": eyear, "fc": myexp.fc}).swap_dims({"time":"lag_years"})
-        myexp.to_netcdf(split_timesteps=False)
+
+        myexp.data = myexp.data.assign_coords(
+            {"month": iem, "year": eyear, "fc": myexp.fc}
+        ).swap_dims({"time": "lag_years"})
+        myexp.to_nctiles(split_timesteps=False)
