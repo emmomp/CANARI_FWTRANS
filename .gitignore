@@ -4,6 +4,7 @@ notebooks/*py
 code/.pylintrc
 code/*txt
 other_data
+*gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
