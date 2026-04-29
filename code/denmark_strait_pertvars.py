@@ -34,7 +34,7 @@ attrs = {
 
 SECTION = "Denmark Strait"
 pert='pert_10y_tauu_NGlandJANpulse'
-startdate=np.datetime64('1992-01-01T12:00:00')
+startdate=np.datetime64('1996-01-01T12:00:00')
 Sref=35
 
 [section_pt1, section_pt2] = ecco.get_section_endpoints(SECTION)
