@@ -55,8 +55,8 @@ def write_pert_pulse(pvar, label, pertds, pulse_time="1996-01-01"):
         -compact_expand, f"{PERT_DIR}/xx_{pvar}.0000000129.data.{label}_minus"
     )
 
-myexp_data = xr.open_dataset(f"{DATA_DIR}/expts/{EXPT}/tauu.nc")
-ds_4y = myexp_data.swap_dims({"time": "lag_years"}).sel(lag_years=-4, method="nearest")
+myexp_data = xr.open_dataset(f"{DATA_DIR}/expts/{EXPT}/adxx_tauu.nc")
+ds_4y = myexp_data.sel(lag_years=-4, method="nearest")
 
 pert_mask = {}
 
