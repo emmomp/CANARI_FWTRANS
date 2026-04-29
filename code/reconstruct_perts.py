@@ -25,6 +25,7 @@ from datetime import date
 import xarray as xr
 import numpy as np
 
+sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 sys.path.insert(0, "/users/emmomp/Python")
 import xadjoint as xad
 import pandas as pd
@@ -35,7 +36,7 @@ from inputs import (
     ecco_grid,
     EXPDIR,
     GRIDDIR,
-    CONV_DIR,
+    PERTCONV_DIR,
     DATA_DIR,
     eyears,
 )
@@ -54,13 +55,13 @@ NT_ADJ = 260
 ADJFREQ = 604800
 NYEARS_ADJ = 5
 
-perts = glob.glob(f"{DATA_DIR}/*pertfields.nc")
+perts = glob.glob(f"{DATA_DIR}/perts/*pertfields.nc")
 perts = [x.split("/")[-1] for x in perts]
 for pert in perts:
     if "pulse" in pert:
         print(pert)
         pert_lab = pert.split("/")[-1].removesuffix("_pertfields.nc")
-        ds_pert = xr.open_dataset(f"{DATA_DIR}/{pert}")
+        ds_pert = xr.open_dataset(f"{DATA_DIR}/perts/{pert}")
         pert_year_max = ds_pert.time.dt.year.max()
         pert_year_min = ds_pert.time.dt.year.min()
 
@@ -90,7 +91,7 @@ for pert in perts:
                         )
                     print(f"start date {STARTDATE}, lag 0 {lag0}")
 
-                    FOUT = f"{CONV_DIR}/{pert_lab}_{eyear}_{imth[lmth]}_recon.nc"
+                    FOUT = f"{PERTCONV_DIR}/{pert_lab}_{eyear}_{imth[lmth]}_recon.nc"
                     if os.path.isfile(FOUT):
                         print(f"Found {FOUT}, skipping")
                         continue
