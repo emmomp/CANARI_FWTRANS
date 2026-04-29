@@ -17,6 +17,7 @@ Updated Sep 2025
 @author: emmomp@bas.ac.uk Emma J D Boland
 """
 import glob
+from datetime import date
 import os
 import sys
 import numpy as np

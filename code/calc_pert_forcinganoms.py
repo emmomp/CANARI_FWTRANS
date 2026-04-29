@@ -25,7 +25,7 @@ import xarray as xr
 
 sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
-from inputs import GRIDDIR, ecco_grid
+from inputs import GRIDDIR, ecco_grid, EXPDIR, DATA_DIR
 
 exf_vars = [
     "EXFqnet",
@@ -39,7 +39,7 @@ exf_vars = [
 ]
 
 RHOCONST = 1029
-
+year_start='1992'
 
 def load_pert(pert, dfreq):
     print(f"Loading {dfreq} {pert} data")
@@ -67,19 +67,15 @@ def load_pert(pert, dfreq):
     return exf_ds
 
 
-all_pert_plus = glob.glob("../experiments/pert_*plus*")
+all_pert_plus = glob.glob(f"{EXPDIR}/pert_*plus*")
 for pert_plus in all_pert_plus:
     pert_minus = pert_plus.replace("plus", "minus")
     pert_lab = pert_plus.split("/")[-1].replace("plus", "")
 
-    if "2002" in pert_plus:
-        year_start = "2002"
-    else:
-        year_start = "1996"
     startdate = f"{year_start}-01-01"
 
     for freq in ["week", "mon"]:
-        fout = f"../data_out/perts/{pert_lab}_{freq}_pertfields.nc"
+        fout = f"{DATA_DIR}/perts/{pert_lab}_{freq}_pertfields.nc"
         if os.path.isfile(fout):
             print(f"Found {fout}, skipping")
         else:
@@ -88,7 +84,7 @@ for pert_plus in all_pert_plus:
             ds_minus = load_pert(pert_minus, freq)
             if (not ds_plus) and (not ds_minus):
                 continue
-            ds_ctrl = load_pert(f"../experiments/pert_10y_ctrl_{year_start}", freq)
+            ds_ctrl = load_pert(f"{EXPDIR}/fwd_26y", freq)
 
             ds_all = []
             if ds_plus and ds_ctrl:
