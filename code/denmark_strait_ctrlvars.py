@@ -47,7 +47,7 @@ ctrl_section.reset_index('ji').to_netcdf(f'../data_out/{SECTION.replace(" ","_")
 # Define halocline and find base
 base_mask=(ctrl_section['SALT']<=34.8)&((-ctrl_section['Z'])<ctrl_section['Depth'])
 base_depth=ecco_grid.Z[base_mask.argmin('k').load()-1]
-base_mask=xr.where(ecco_grid.Z>depth,1,0)
+base_mask=xr.where(ecco_grid.Z>base_depth,1,0)
 base_mask.name='halocline_mask'
 base_mask=base_mask.assign_coords({'Z':ecco_grid['Z']})
 base_depth.name='halocline_depth'

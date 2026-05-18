@@ -51,7 +51,7 @@ exps = [
     "pert_10y_tauu_NAlaskaJANpulseminus",
 ]
 
-startdate = np.datetime64("1996-01-01")
+startdate = np.datetime64("1992-01-01")
 
 for exp in exps:
     print(f"Calculating {exp} {SECTION} transports")
@@ -69,7 +69,7 @@ for exp in exps:
             )
         )
 
-    ds = xr.merge([ecco_grid, ds])
+    ds = xr.merge(ds+[ecco_grid, ]).load()
 
     print("Data loaded, calculating transports")
 
