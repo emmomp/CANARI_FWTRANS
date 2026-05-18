@@ -36,14 +36,13 @@ attrs = {
 }
 
 pert_vars = [
-    "SALT",
+    "SALT","SSH",
 ]
 
 YEAR_START = 1992  # Start of simulation
 YEAR_PERT = 1996  # Start of perturbation
 PERT_NY = YEAR_PERT - YEAR_START
 CALC_YEARS = 4  # Number of years to calculate over
-FREQ = "mon"
 SREF = 35
 
 def load_pert(pert, freq):
@@ -72,8 +71,10 @@ def load_pert(pert, freq):
     return exf_ds
 
 
-all_pert_plus = glob.glob("../experiments/pert_*pulseplus*")
-for pert_plus in all_pert_plus:
+all_pert_plus = ["pert_10y_tauu_NAlaskaJANpulseplus","pert_10y_tauu_NGlandJANpulseplus","pert_10y_tauv_EGlandplus_7dpulseDEC",]
+freqs=["mon","mon","week"]
+for ipp,pert_plus in enumerate(all_pert_plus):
+    FREQ = freqs[ipp]
     pert_minus = pert_plus.replace("plus", "minus")
     pert_lab = pert_plus.split("/")[-1].replace("plus", "")
 
@@ -95,12 +96,7 @@ for pert_plus in all_pert_plus:
         year_min = ds_plus.time.dt.year.min()
         year_max = ds_plus.time.dt.year.max()
         years = [int(year) for year in np.arange(year_min, year_max + 1)]
-        if FREQ == "week":
-            ds_ctrl = load_pert(f"{EXPDIR}/fwd_26y", FREQ)
-        else:
-            ds_ctrl = ecco.recursive_load_ecco_var_from_years_nc(
-                SOLN_DIR, vars_to_load=pert_vars, years_to_load=years
-            )
+        ds_ctrl = load_pert(f"{EXPDIR}/fwd_26y", FREQ)
         ds_ctrl["FWC"] = (
             (1 - ds_ctrl.SALT / SREF) * ecco_grid.drF * ecco_grid.hFacC
         ).sum("k")
