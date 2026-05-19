@@ -85,11 +85,11 @@ for ipp,pert_plus in enumerate(all_pert_plus):
         print(f"Found {FOUT}, skipping")
     else:
 
-        ds_plus = load_pert(pert_plus, FREQ)
+        ds_plus = load_pert(f"{EXPDIR}/{pert_plus}", FREQ)
         ds_plus["FWC"] = (
             (1 - ds_plus.SALT / SREF) * ecco_grid.drF * ecco_grid.hFacC
         ).sum("k")
-        ds_minus = load_pert(pert_minus, FREQ)
+        ds_minus = load_pert(f"{EXPDIR}/{pert_minus}", FREQ)
         ds_minus["FWC"] = (
             (1 - ds_minus.SALT / SREF) * ecco_grid.drF * ecco_grid.hFacC
         ).sum("k")
@@ -111,9 +111,17 @@ for ipp,pert_plus in enumerate(all_pert_plus):
 
         ds_all = xr.concat(ds_all, "pert", coords="minimal", compat="override")
         if ds_all:
-            ds_out = ds_all.isel(
-                time=slice(PERT_NY * 12 + 1, PERT_NY * 12 + 1 + 12 * CALC_YEARS)
-            )
+            if FREQ=="mon":
+                ds_out = ds_all.isel(
+                    time=slice(PERT_NY * 12 + 1, PERT_NY * 12 + 1 + 12 * CALC_YEARS)
+                )
+            else:
+                ds_out = ds_all.isel(
+                    time=slice(PERT_NY * 52 + 1, PERT_NY * 52 + 1 + 52 * CALC_YEARS)
+                )
+                
             print(f"Writing {FOUT}")
             ds_out.attrs.update(attrs)
-            ds_out.drop_vars("time_bnds").to_netcdf(FOUT)
+            if "time_bnds" in ds_out:
+                ds_out=ds_out.drop_vars("time_bnds")
+            ds_out.to_netcdf(FOUT)
