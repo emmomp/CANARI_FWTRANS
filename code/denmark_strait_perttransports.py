@@ -19,6 +19,7 @@ Updated Sep 2025
 """
 from datetime import date
 import sys
+import os
 import numpy as np
 import xarray as xr
 
@@ -49,46 +50,49 @@ exps = [
     "pert_10y_tauu_NGlandJANpulseminus",
     "pert_10y_tauu_NAlaskaJANpulseplus",
     "pert_10y_tauu_NAlaskaJANpulseminus",
+    "fwd_26y",
 ]
 
 startdate = np.datetime64("1992-01-01")
 
 for exp in exps:
-    print(f"Calculating {exp} {SECTION} transports")
-
-    ds = []
-    for var in ["SALT", "UVELMASS", "VVELMASS", "GM_PsiX", "GM_PsiY"]:
-        ds.append(
-            ecco.load_ecco_vars_from_mds(
-                f"{EXPDIR}/{exp}/diags/{var}_mon_mean",
-                mds_grid_dir=GRIDDIR,
-                mds_files=f"{var}_mon_mean",
-                output_freq_code="AVG_MON",
-                model_start_datetime=startdate,
-                read_grid=False,
+    FOUT=f"{DATA_DIR}/perts/{exp}_{SECTION_LABEL}_2dtransports.nc"
+    if os.path.isfile(FOUT):
+        print(f"Found {FOUT}, skipping")
+    else:
+        print(f"Calculating {exp} {SECTION} transports")
+    
+        ds = []
+        for var in ["SALT", "UVELMASS", "VVELMASS", "GM_PsiX", "GM_PsiY"]:
+            ds.append(
+                ecco.load_ecco_vars_from_mds(
+                    f"{EXPDIR}/{exp}/diags/{var}_mon_mean",
+                    mds_grid_dir=GRIDDIR,
+                    mds_files=f"{var}_mon_mean",
+                    output_freq_code="AVG_MON",
+                    model_start_datetime=startdate,
+                    read_grid=False,
+                )
             )
+    
+        ds = xr.merge(ds+[ecco_grid, ]).load()
+    
+        print("Data loaded, calculating transports")
+    
+        full_vol_transport = ecco.calc_section_vol_trsp(
+            ds, maskC=line_maskC, grid=grid, along_section=True
         )
-
-    ds = xr.merge(ds+[ecco_grid, ]).load()
-
-    print("Data loaded, calculating transports")
-
-    full_vol_transport = ecco.calc_section_vol_trsp(
-        ds, maskC=line_maskC, grid=grid, along_section=True
-    )
-    full_fw_transport = ecco.calc_section_fw_trsp(
-        ds, Sref=SREF, maskC=line_maskC, along_section=True, grid=grid
-    ).assign_coords({"Sref": SREF})
-
-    full_transport = xr.merge(
-        [full_vol_transport, full_fw_transport], compat="override"
-    )
-    full_transport = full_transport.assign_coords({"exp": exp})
-
-    print("All calculations done, writing to file")
-    full_transport.attrs.update(attrs)
-    full_transport.reset_index("ij").to_netcdf(
-        f"{DATA_DIR}/perts/{exp}_{SECTION_LABEL}_2dtransports.nc"
-    )
+        full_fw_transport = ecco.calc_section_fw_trsp(
+            ds, Sref=SREF, maskC=line_maskC, along_section=True, grid=grid
+        ).assign_coords({"Sref": SREF})
+    
+        full_transport = xr.merge(
+            [full_vol_transport, full_fw_transport], compat="override"
+        )
+        full_transport = full_transport.assign_coords({"exp": exp})
+    
+        print("All calculations done, writing to file")
+        full_transport.attrs.update(attrs)
+        full_transport.reset_index("ij").to_netcdf(FOUT)
 
 print("All done")
