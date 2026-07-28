@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/873076307.svg)](https://doi.org/10.5281/zenodo.17225513)
+
 # CANARI_FWTRANS
 This repositary contains python code and notebooks to accompany the manuscript "Local and Remote Drivers of Liquid Freshwater Transport through Denmark Strait" Boland et al 2026. The contents will allow for the reproduction of all tables and figures in the paper, as well the reproduction of the data files necessary for the figures. See below for more details.
 
