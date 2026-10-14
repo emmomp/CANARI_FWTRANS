@@ -16,6 +16,7 @@ Updated Sep 2025
 import sys
 import xmitgcm
 import xarray as xr
+from datetime import date
 
 sys.path.insert(0, "/users/emmomp/Python/ECCOv4-py")
 import ecco_v4_py as ecco
